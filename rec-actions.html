@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruiter Actions – BeyondMatch</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="stylesheet" href="recruiter-matches.css" />
+  <link rel="stylesheet" href="skeleton-loader.css" />
+
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/rec-actions.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="menu">
+        <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html"     class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html"  class="menu-item">Post Job</a>
+    <a href="rec-jobs.html"     class="menu-item">My Jobs</a>
+    <a href="jobs.html" class="menu-item">Jobs</a>
+    <a href="cand-matches.html" class="menu-item">Candidate Matches</a>
+    <a href="rec-locatehire.html" class="menu-item">CandidateMap</a>
+     <a href="rec-leads.html" class="menu-item">
+    Find Leads
+</a>
+    <a href="rec-actions.html"  class="menu-item active">Recruiter Actions</a>
+    <a href="settings.html"     class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+
+  </nav>
+</aside>
+
+<main class="main">
+
+  <div class="page-title">
+    <h1>Recruiter Actions</h1>
+    <p>Manage applications and candidate pipeline for your posted jobs.</p>
+  </div>
+
+  <!-- top bar -->
+  <div class="actions-topbar">
+    <div class="pipeline-tabs" id="pipelineTabs">
+      <button class="ptab active" data-status="all">All <span class="ptab-count" id="cnt-all">0</span></button>
+      <button class="ptab" data-status="applied">Applied <span class="ptab-count" id="cnt-applied">0</span></button>
+      <button class="ptab" data-status="reviewing">Reviewing <span class="ptab-count" id="cnt-reviewing">0</span></button>
+      <button class="ptab" data-status="shortlisted">Shortlisted <span class="ptab-count" id="cnt-shortlisted">0</span></button>
+      <button class="ptab" data-status="interview">Interview <span class="ptab-count" id="cnt-interview">0</span></button>
+      <button class="ptab" data-status="hired">Hired <span class="ptab-count" id="cnt-hired">0</span></button>
+      <button class="ptab" data-status="rejected">Rejected <span class="ptab-count" id="cnt-rejected">0</span></button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5580" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search candidate…" />
+      </div>
+      <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel()">
+        🔔 Notifications
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- application grid -->
+  <div id="actionsContainer" class="app-grid"></div>
+
+</main>
+
+<!-- ══ Notification Panel ══ -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-head">
+    <h3>🔔 Notifications</h3>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <button class="mark-read-btn" onclick="markAllRead()">Mark all read</button>
+      <button class="notif-panel-close" onclick="toggleNotifPanel()">✕</button>
+    </div>
+  </div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-empty">No notifications yet.</div>
+  </div>
+</div>
+
+<!-- ══ Note Modal ══ -->
+<div id="noteOverlay" class="bm-overlay" style="display:none" onclick="closeNoteModal(event)">
+  <div class="bm-modal">
+    <button class="bm-modal-close" onclick="document.getElementById('noteOverlay').style.display='none'">✕</button>
+    <div class="bm-modal-title">Recruiter Note</div>
+    <h2 id="noteModalName" style="margin-bottom:16px;">Candidate</h2>
+
+    <!-- Candidate cover note — read-only, only shown if present -->
+    <div id="coverNoteSection" style="display:none;margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a5580;margin-bottom:6px;">
+        Candidate's Cover Note
+      </div>
+      <div id="coverNoteText"
+        style="background:rgba(122,162,255,.04);border:1px solid rgba(122,162,255,.10);
+               border-left:3px solid rgba(122,162,255,.3);border-radius:0 8px 8px 0;
+               padding:10px 14px;font-size:13px;color:#a0aec0;font-style:italic;line-height:1.55;">
+      </div>
+    </div>
+
+    <!-- Recruiter private note -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a5580;margin-bottom:6px;">
+      Your Private Note
+    </div>
+    <textarea class="bm-textarea" id="noteTextarea"
+      placeholder="Add your private notes about this candidate — interview impressions, follow-up reminders, red flags, etc."></textarea>
+    <div style="font-size:11px;color:#4a5580;margin-top:6px;">🔒 Only visible to you</div>
+
+    <div class="bm-btn-row">
+      <button class="bm-btn" onclick="document.getElementById('noteOverlay').style.display='none'">Cancel</button>
+      <button class="bm-btn primary" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Profile Modal ══ -->
+<div id="profileOverlay" class="bm-overlay" style="display:none" onclick="closeProfileModal(event)">
+  <div class="bm-modal" style="max-width:600px;">
+    <button class="bm-modal-close" onclick="document.getElementById('profileOverlay').style.display='none'">✕</button>
+    <div class="bm-modal-title">Candidate Profile</div>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<!-- instant skeletons -->
+
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+</body>
+</html>

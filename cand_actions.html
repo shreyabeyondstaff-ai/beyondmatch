@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Applications – BeyondMatch</title>
+  <link rel="stylesheet" href="recruiter-matches.css" />
+  <link rel="stylesheet" href="skeleton-loader.css" />
+
+  <link rel="stylesheet" href="cand-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/cand_actions.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="menu">
+    <a href="candidate-dashboard.html" class="menu-item">Dashboard</a>
+    <a href="resume.html"              class="menu-item">Resume Analysis</a>
+    <a href="jobmatches.html"          class="menu-item">Job Matches</a>
+    <a href="savedjobs.html"           class="menu-item">Saved Jobs</a>
+    <a href="locatehire.html"          class="menu-item">LocateHire</a>
+    <a href="cand_actions.html"        class="menu-item active">My Applications</a>
+    <a href="settings.html"            class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+  </nav>
+</aside>
+
+<main class="main">
+
+  <div class="page-title">
+    <h1>My Applications</h1>
+    <p>Track your application status and recruiter responses in real-time.</p>
+  </div>
+
+  <div class="ca-topbar">
+    <div class="pipeline-tabs" id="pipelineTabs">
+      <button class="ptab active" data-status="all">All <span class="ptab-count" id="cnt-all">0</span></button>
+      <button class="ptab" data-status="applied">Applied <span class="ptab-count" id="cnt-applied">0</span></button>
+      <button class="ptab" data-status="reviewing">Reviewing <span class="ptab-count" id="cnt-reviewing">0</span></button>
+      <button class="ptab" data-status="shortlisted">Shortlisted <span class="ptab-count" id="cnt-shortlisted">0</span></button>
+      <button class="ptab" data-status="interview">Interview <span class="ptab-count" id="cnt-interview">0</span></button>
+      <button class="ptab" data-status="hired">Hired <span class="ptab-count" id="cnt-hired">0</span></button>
+      <button class="ptab" data-status="rejected">Rejected <span class="ptab-count" id="cnt-rejected">0</span></button>
+    </div>
+    <button class="notif-btn" onclick="toggleNotifPanel()">
+      🔔 Updates
+      <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+    </button>
+  </div>
+
+  <div id="appContainer" class="app-grid"></div>
+
+</main>
+
+<!-- Notification Panel -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-panel-head">
+    <h3>🔔 Recruiter Updates</h3>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <button class="mark-read-btn" onclick="markAllRead()">Mark all read</button>
+      <button class="notif-panel-close" onclick="toggleNotifPanel()">✕</button>
+    </div>
+  </div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-empty">No updates yet.</div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detailOverlay" class="bm-overlay" style="display:none" onclick="closeDetailModal(event)">
+  <div class="bm-modal">
+    <button class="bm-modal-close" onclick="document.getElementById('detailOverlay').style.display='none'">✕</button>
+    <div class="bm-modal-title">Application Detail</div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- ── Apply-from-Link Modal ───────────────────────────────────────── -->
+<div id="applyOverlay" class="bm-overlay" style="display:none" onclick="if(event.target===this)closeApplyModal()">
+  <div class="bm-modal" style="max-width:480px;">
+    <button class="bm-modal-close" onclick="closeApplyModal()">✕</button>
+    <div class="bm-modal-title">Quick Apply</div>
+    <h2 id="applyModalTitle" style="margin:0 0 6px;font-size:20px;color:#e2e8f0;">Job Title</h2>
+    <p id="applyModalSub" style="margin:0 0 20px;color:#6b7fa8;font-size:13px;"></p>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a5580;display:block;margin-bottom:8px;">
+        Cover Note <span style="color:#4a5580;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span>
+      </label>
+      <textarea id="applyNoteInput"
+        placeholder="Briefly introduce yourself or why you're a great fit…"
+        style="width:100%;min-height:100px;resize:vertical;
+               background:#090e1c;border:1px solid rgba(122,162,255,.15);
+               border-radius:10px;color:#e2e8f0;font-family:inherit;font-size:13px;
+               padding:12px 14px;outline:none;line-height:1.55;box-sizing:border-box;"
+        onfocus="this.style.borderColor='rgba(122,162,255,.4)'"
+        onblur="this.style.borderColor='rgba(122,162,255,.15)'"
+      ></textarea>
+    </div>
+
+    <div id="applyStatusMsg" style="display:none;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:14px;"></div>
+
+    <div class="bm-btn-row">
+      <button class="bm-btn" onclick="closeApplyModal()">Cancel</button>
+      <button class="bm-btn primary" id="applySubmitBtn" onclick="submitApplyModal()">
+        🚀 Submit Application
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- instant skeletons -->
+
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="candidate.js"></script>
+</body>
+</html>

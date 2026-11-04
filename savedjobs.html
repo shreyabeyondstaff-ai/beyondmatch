@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saved Jobs – BeyondMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="skeleton-loader.css" />
+
+  <link rel="stylesheet" href="cand-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="cand-sidebar">
+  <a href="/savedjobs.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="cand-menu">
+    <a href="candidate-dashboard.html" class="cand-menu-item">Dashboard</a>
+    <a href="resume.html"              class="cand-menu-item">Resume Analysis</a>
+    <a href="jobmatches.html"          class="cand-menu-item">Job Matches</a>
+    <a href="savedjobs.html"           class="cand-menu-item active">Saved Jobs</a>
+    <a href="locatehire.html"          class="cand-menu-item">LocateHire</a>
+          <a href="cand_actions.html"          class="cand-menu-item">Candidate Actions</a>
+    <a href="settings.html"            class="cand-menu-item">Settings</a>
+  </nav>
+  <button class="logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<main class="cand-main">
+
+  <div class="cand-page-title">
+    <h1>Saved Jobs</h1>
+    <p>Bookmarked opportunities you want to revisit.</p>
+  </div>
+
+  <div class="section-header">
+    <div>
+      <h3>Your Bookmarks</h3>
+      <div class="saved-count" id="savedCount"></div>
+    </div>
+  </div>
+
+  <div id="savedJobsGrid" class="saved-grid"></div>
+
+</main>
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="candidate.js"></script>
+
+</body>
+</html>

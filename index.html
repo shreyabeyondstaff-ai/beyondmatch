@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeyondMatch - Recruitment Intelligence Platform</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:,">
+  
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="landing-navbar">
+  <div class="brand">BeyondMatch</div>
+  <nav style="display:flex;align-items:center;gap:10px;">
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme" style="width:auto;">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <button class="nav-btn" onclick="openAuth('login')">Login</button>
+    <button class="nav-btn outline" onclick="openAuth('signup')">Sign Up</button>
+  </nav>
+</header>
+
+<!-- HERO SECTION -->
+<section class="hero-wrapper">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Smart Matching, Stronger Hiring.
+    </div>
+    <h1>
+      <span class="gradient-text">Intelligence</span><br/>
+      <span class="gradient-text">That Scales Talent</span>
+    </h1>
+    <p>
+      The enterprise-grade matching engine for data-driven recruitment, powered by AI and Snowflake infrastructure.
+      Automate candidate screening, analyze hiring trends, and make informed decisions backed by real-time analytics.
+    </p>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="section-wrapper features-section">
+  <div class="section-header">
+    <h2>Platform Capabilities</h2>
+    <p>End-to-end recruitment intelligence and automation</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+      <div class="feature-content">
+        <h3>Automated Job Ingestion</h3>
+        <p>Continuous collection of job data from multiple external platforms using API integrations. Python-based ETL pipelines automatically fetch, clean, and normalize postings in real-time.</p>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v6m0 6v6"/>
+          <path d="M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24"/>
+          <path d="M1 12h6m6 0h6"/>
+          <path d="M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+        </svg>
+      </div>
+      <div class="feature-content">
+        <h3>AI-Driven Candidate Matching</h3>
+        <p>Semantic similarity matching using embeddings and AI models to score job–candidate alignment. Transparent match scores based on skills, experience, and role requirements.</p>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <div class="feature-content">
+        <h3>Resume &amp; JD Analysis</h3>
+        <p>Automated extraction and structuring of candidate profiles from resumes (PDF/DOCX). AI analyzes job descriptions to identify required skills, roles, and experience levels.</p>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+      </div>
+      <div class="feature-content">
+        <h3>Snowflake Data Warehouse</h3>
+        <p>Layered architecture with RAW, CLEAN, and BI stages for scalable storage and querying. Structured transformations enable analytics-ready datasets for business intelligence.</p>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      </div>
+      <div class="feature-content">
+        <h3>Real-Time Analytics Dashboards</h3>
+        <p>Interactive Power BI visualizations showing skill demand trends, match accuracy, geographic distribution, and hiring pipeline status for data-driven decisions.</p>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="feature-content">
+        <h3>Secure API Access</h3>
+        <p>RESTful backend APIs for job uploads, candidate submissions, and match retrieval. Role-based access control ensures users only see authorized recruitment data.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILT FOR SECTION -->
+<section class="bm-built-section">
+  <div class="bm-built-header">
+    <h2>Built for <span>Candidates</span> &amp; <span>Recruiters</span></h2>
+    <p>Whether you're searching for the perfect opportunity or the ideal candidate, BeyondMatch helps you move faster with confidence.</p>
+  </div>
+
+  <div class="bm-built-grid">
+    <div class="bm-built-card">
+      <div class="bm-card-top">
+        <div class="bm-avatar">👤</div>
+        <h3>Candidates</h3>
+      </div>
+      <ul class="bm-feature-list">
+        <li>AI-powered job recommendations</li>
+        <li>Location &amp; salary-based filters</li>
+        <li>Track and apply seamlessly</li>
+      </ul>
+      <button class="bm-card-btn" onclick="openAuth('signup')">Find a Job</button>
+    </div>
+
+    <div class="bm-built-card recruiter">
+      <div class="bm-card-top">
+        <div class="bm-avatar recruiter-avatar">🏢</div>
+        <h3>Recruiters</h3>
+      </div>
+      <ul class="bm-feature-list">
+        <li>High-quality candidate matches</li>
+        <li>Real-time hiring insights</li>
+        <li>Streamlined recruitment workflow</li>
+      </ul>
+      <button class="bm-card-btn" onclick="openAuth('signup')">Find Talent</button>
+    </div>
+  </div>
+</section>
+
+<!-- DARK OVERLAY -->
+<div class="auth-overlay" id="authOverlay" onclick="closeAuth()"></div>
+
+<!-- LOGIN / SIGNUP CARD -->
+<div class="auth-card" id="authCard">
+  <h2 id="authTitle">Login</h2>
+  <p id="authMessage" class="auth-message"></p>
+  <label for="authEmail" style="font-size:0.8rem;color:#94a3b8;display:block;margin-bottom:4px;">Email</label>
+  <input id="authEmail" type="email" placeholder="Email" />
+  <label for="authPassword" style="font-size:0.8rem;color:#94a3b8;display:block;margin-bottom:4px;margin-top:8px;">Password</label>
+  <input id="authPassword" type="password" placeholder="Password" />
+
+  <select id="roleSelect" style="display:none;">
+    <option value="">Select Role</option>
+    <option value="candidate">Job Seeker / Candidate</option>
+    <option value="recruiter">Recruiter</option>
+  </select>
+
+  <input type="text" id="orgNameInput" placeholder="Organisation Name" style="display:none;" />
+
+  <!-- RESUME UPLOAD — shown only for candidate signup -->
+  <div id="resumeUploadWrap" style="display:none; margin-top: 10px;">
+    <label style="font-size:0.8rem; color:#94a3b8; display:block; margin-bottom:6px;">
+      Upload Resume (PDF / DOCX) — optional but recommended
+    </label>
+    <input type="file" id="authResumeFile" accept=".pdf,.doc,.docx"
+      style="width:100%; font-size:0.8rem; color:#94a3b8;
+             background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+             border-radius:8px; padding:8px 10px; cursor:pointer;" />
+    <p id="authResumeStatus"
+       style="font-size:0.75rem; color:#64748b; margin-top:5px; min-height:16px;"></p>
+  </div>
+
+  <button class="auth-btn">Continue</button>
+  <p class="auth-switch">
+    <span id="authText">Don't have an account?</span>
+    <a id="authToggleLink" onclick="toggleAuth()">Sign Up</a>
+  </p>
+</div>
+
+<!-- PDF.js + Mammoth (loaded with defer — only needed when resume upload is triggered) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js" integrity="sha384-8NWE3bZDrmRI4IePMoQaEoLhAQ1MmRMJkdNgnGiHRFanTqsFKr0TmK6aSZvFJ/PO" crossorigin="anonymous" defer></script>
+
+<script type="module" src="auth.js"></script>
+
+</body>
+</html>

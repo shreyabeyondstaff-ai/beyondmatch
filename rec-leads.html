@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Leads – BeyondMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="recruiter-matches.css" />
+  <link rel="stylesheet" href="skeleton-loader.css" />
+
+  <!-- Resume parsing (same libraries used elsewhere in the app for PDF/DOCX text extraction) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js" integrity="sha384-8NWE3bZDrmRI4IePMoQaEoLhAQ1MmRMJkdNgnGiHRFanTqsFKr0TmK6aSZvFJ/PO" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/rec-dash.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="menu">
+     <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html"       class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html"    class="menu-item">Post Job</a>
+    <a href="rec-jobs.html"       class="menu-item">My Jobs</a>
+    <a href="jobs.html" class="menu-item">Jobs</a>
+    <a href="cand-matches.html"   class="menu-item">Candidate Matches</a>
+    <a href="rec-locatehire.html" class="menu-item">CandidateMap</a>
+    <a href="rec-leads.html"      class="menu-item active">Find Leads</a>
+    <a href="rec-actions.html"    class="menu-item">Recruiter Actions</a>
+    <a href="settings.html"       class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+  </nav>
+</aside>
+
+<main class="main">
+
+  <div class="page-title">
+    <h1>Find Leads</h1>
+    <p>Freelance projects pulled in from Freelancer.com — upload a resume to see which ones fit best.</p>
+  </div>
+
+  <!-- ACCESS-DENIED (shown only if the signed-in recruiter isn't Beyond Match) -->
+  <div id="deniedBox" class="denied-box" style="display:none;">
+    <h2>This page isn't available for your account</h2>
+    <p>Find Leads is currently limited to a specific organisation.</p>
+  </div>
+
+  <!-- MAIN CONTENT (hidden until access is confirmed) -->
+  <div id="leadsContent" style="display:none;">
+
+    <!-- RESUME UPLOAD -->
+    <div class="upload-card">
+      <div class="u-label">Check A Resume</div>
+      <div class="upload-row">
+        <input type="file" id="resumeFile" accept=".pdf,.docx" />
+        <button class="btn-primary" id="analyzeBtn" onclick="window.analyzeResumeAgainstLeads()">Analyze Resume</button>
+        <button class="btn-ghost" id="clearBtn" onclick="window.clearResumeMatching()" style="display:none;">Clear</button>
+        <span class="upload-status" id="uploadStatus"></span>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="leads-toolbar">
+      <div>
+        <h3>Freelance Leads</h3>
+        <div class="leads-count" id="leadsCount"></div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <div class="toggle-modern" id="viewToggle">
+          <button class="toggle-pill active" data-view="all">All Leads</button>
+          <button class="toggle-pill" data-view="matched" id="matchedToggleBtn" disabled title="Upload a resume to enable">Matched Only</button>
+        </div>
+
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5580" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="leadSearch" placeholder="Search leads…" />
+        </div>
+
+        <div class="lead-filters">
+          <select id="matchFilter" disabled>
+            <option value="">All Match %</option>
+            <option value="50">50%+</option>
+            <option value="60">60%+</option>
+            <option value="70">70%+</option>
+          </select>
+          <select id="budgetSort">
+            <option value="">Sort by Budget</option>
+            <option value="high">High → Low</option>
+            <option value="low">Low → High</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div id="leadsGrid" class="leads-grid"></div>
+
+  </div>
+
+</main>
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+</body>
+</html>

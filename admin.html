@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Portal – BeyondMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js" integrity="sha384-tgbB5AKnszdcfwcZtTfuhR3Ko1XZdlDfsLtkxiiAZiVkkXCkFmp+FQFh+V/UTo54" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="admin-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+
+<div id="lbar"></div>
+
+<aside class="sidebar">
+  <a href="/admin.html" class="brand">BeyondMatch</a>
+  <nav class="nav">
+    <a href="admin.html"    class="nav-link active">Admin Portal</a>
+    <a href="settings.html" class="nav-link">Settings</a>
+    <button class="logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+  </nav>
+  <div style="font-size:10px;color:var(--text-3);margin-top:8px;padding:0 3px;line-height:1.5;">
+    Admin access only.<br>All actions are logged.
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <h1>System Control Center</h1>
+      <p>BeyondMatch platform operations — health, performance &amp; insights</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="live-dot">LIVE</div>
+      <span class="ts-label" id="lastTs">—</span>
+      <button class="rbtn" id="rbtn" onclick="boot()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- METRICS TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker-inner" id="ticker">
+      <span class="ti"><span class="lbl">Loading</span><span class="v b">—</span></span>
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi"><span class="kpi-ic">👥</span><div class="kpi-lbl">Candidates</div><div class="kpi-val" id="k1"><div class="shim" style="height:22px;width:45px;"></div></div><div class="kpi-sub" id="k1s">registered</div></div>
+    <div class="kpi"><span class="kpi-ic">🏢</span><div class="kpi-lbl">Hiring Companies</div><div class="kpi-val" id="k2"><div class="shim" style="height:22px;width:35px;"></div></div><div class="kpi-sub" id="k2s">organisations</div></div>
+    <div class="kpi"><span class="kpi-ic">📋</span><div class="kpi-lbl">Job Listings</div><div class="kpi-val" id="k3"><div class="shim" style="height:22px;width:40px;"></div></div><div class="kpi-sub" id="k3s">active JDs</div></div>
+    <div class="kpi"><span class="kpi-ic">🎯</span><div class="kpi-lbl">Matches Run</div><div class="kpi-val" id="k4"><div class="shim" style="height:22px;width:50px;"></div></div><div id="k4b"></div></div>
+    <div class="kpi"><span class="kpi-ic">📈</span><div class="kpi-lbl">Avg Match Score</div><div class="kpi-val" id="k5"><div class="shim" style="height:22px;width:45px;"></div></div><div class="kpi-sub" id="k5s">platform-wide</div></div>
+    <div class="kpi"><span class="kpi-ic">🆕</span><div class="kpi-lbl">New This Week</div><div class="kpi-val" id="k6"><div class="shim" style="height:22px;width:35px;"></div></div><div class="kpi-sub">new signups</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('overview',this)"><div class="tab-dot"></div>Overview</button>
+    <button class="tab-btn" onclick="switchTab('matchquality',this)"><div class="tab-dot"></div>Recruiter Pipeline</button>
+    <button class="tab-btn" onclick="switchTab('uxhealth',this)"><div class="tab-dot"></div>Candidate Pipeline</button>
+    <button class="tab-btn" onclick="switchTab('dataquality',this)"><div class="tab-dot"></div>Data Quality</button>
+    <button class="tab-btn" onclick="switchTab('aiinsights',this)" style="color:var(--purple);">✦ AI Insights</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 1: OVERVIEW
+  ════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="g23">
+
+      <!-- Registration trend -->
+      <div class="dc">
+        <div><div class="ct">Platform Growth — Registration Trend</div><div class="cs">candidates &amp; recruiters joined over last 14 days</div></div>
+        <div class="cw" style="min-height:160px;"><canvas id="cTrend"></canvas></div>
+      </div>
+
+      <!-- Top orgs + geo -->
+      <div class="dc" style="gap:12px;">
+        <div>
+          <div class="ct" style="margin-bottom:8px;">Top Recruiting Orgs</div>
+          <div id="orgList"><div class="shim" style="height:12px;margin-bottom:8px;"></div><div class="shim" style="height:12px;margin-bottom:8px;width:80%;"></div><div class="shim" style="height:12px;width:60%;"></div></div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <div class="ct" style="margin-bottom:8px;">Jobs by Country</div>
+          <div id="geoList"><div class="shim" style="height:12px;margin-bottom:8px;"></div><div class="shim" style="height:12px;margin-bottom:8px;width:80%;"></div><div class="shim" style="height:12px;width:60%;"></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Health + Activity -->
+    <div class="g2">
+      <div class="dc">
+        <div><div class="ct">System Health</div><div class="cs">derived from available platform data</div></div>
+        <div class="g2" id="healthGrid">
+          <div class="shim" style="height:52px;border-radius:8px;"></div>
+          <div class="shim" style="height:52px;border-radius:8px;"></div>
+          <div class="shim" style="height:52px;border-radius:8px;"></div>
+          <div class="shim" style="height:52px;border-radius:8px;"></div>
+        </div>
+      </div>
+      <div class="dc">
+        <div><div class="ct">Platform Activity Feed</div><div class="cs">live snapshot from metrics</div></div>
+        <div id="actFeed"><div class="shim" style="height:26px;margin-bottom:7px;"></div><div class="shim" style="height:26px;margin-bottom:7px;"></div><div class="shim" style="height:26px;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 2: RECRUITER PIPELINE
+  ════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-matchquality">
+
+    <!-- Recruiter pipeline funnel -->
+    <div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+        <div><div class="ct">Recruiter Experience Pipeline</div><div class="cs">every stage: system total vs platform engagement — spot where the funnel breaks</div></div>
+        <div style="font-size:10px;color:var(--text-3);font-family:var(--mono);">ETF threshold ≥70%</div>
+      </div>
+      <div id="recPipeline" style="display:flex;flex-direction:row;align-items:stretch;gap:0;overflow-x:auto;"></div>
+    </div>
+
+    <!-- Score distribution + Candidates per job -->
+    <div class="g2">
+      <div class="dc">
+        <div><div class="ct">Match Score Distribution</div><div class="cs">quality bands across all recruiter job matches</div></div>
+        <div id="distBars"><div class="shim" style="height:16px;margin-bottom:7px;"></div><div class="shim" style="height:16px;margin-bottom:7px;width:85%;"></div><div class="shim" style="height:16px;margin-bottom:7px;width:65%;"></div><div class="shim" style="height:16px;width:40%;"></div></div>
+        <div class="divider"></div>
+        <div>
+          <div class="ct" style="margin-bottom:8px;">Quality Summary</div>
+          <div id="qualSummary" style="font-size:12px;color:var(--text-2);line-height:1.6;"></div>
+        </div>
+      </div>
+
+      <div class="dc">
+        <div><div class="ct">Match Score Breakdown</div><div class="cs" id="perJobSub">platform-wide match quality distribution</div></div>
+        <div class="cw" style="min-height:200px;"><canvas id="cPerJob"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Recruiter health flags -->
+    <div class="dc">
+      <div><div class="ct">Recruiter Experience Flags</div><div class="cs">jobs and patterns that are hurting recruiter value</div></div>
+      <div id="qualFlags"><div class="shim" style="height:40px;margin-bottom:8px;"></div><div class="shim" style="height:40px;"></div></div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 3: USER EXPERIENCE HEALTH
+  ════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-uxhealth">
+
+    <!-- Candidate pipeline funnel -->
+    <div class="dc">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+        <div><div class="ct">Candidate Experience Pipeline</div><div class="cs">from signing up → getting matched → quality shortlists</div></div>
+        <div style="font-size:10px;color:var(--text-3);font-family:var(--mono);">ETF threshold ≥70%</div>
+      </div>
+      <div style="display:flex;flex-direction:row;align-items:stretch;gap:0;overflow-x:auto;" id="pipeline"></div>
+    </div>
+
+    <div class="g2">
+
+      <!-- Skills in demand -->
+      <div class="dc">
+        <div><div class="ct">Skills in Demand</div><div class="cs">most required across all active job listings</div></div>
+        <div id="skillsCloud" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <div class="shim" style="height:22px;width:55px;border-radius:16px;"></div>
+          <div class="shim" style="height:26px;width:75px;border-radius:16px;"></div>
+          <div class="shim" style="height:22px;width:45px;border-radius:16px;"></div>
+        </div>
+        <div class="divider"></div>
+        <div>
+          <div class="ct" style="margin-bottom:8px;">Candidate Role Breakdown</div>
+          <div id="rolesBars"><div class="shim" style="height:10px;margin-bottom:7px;"></div><div class="shim" style="height:10px;margin-bottom:7px;width:75%;"></div><div class="shim" style="height:10px;width:55%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Recruiter experience -->
+      <div class="dc">
+        <div><div class="ct">Recruiter Experience Health</div><div class="cs">are recruiters getting value from the platform?</div></div>
+        <div id="recHealth"><div class="shim" style="height:40px;margin-bottom:8px;"></div><div class="shim" style="height:40px;margin-bottom:8px;"></div><div class="shim" style="height:40px;"></div></div>
+        <div class="divider"></div>
+        <div>
+          <div class="ct" style="margin-bottom:8px;">Jobs with No Candidate Matches</div>
+          <div id="zeroMatchJobs" style="font-size:12px;color:var(--text-2);"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 4: DATA QUALITY
+  ════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-dataquality">
+
+    <div class="g2">
+      <!-- Data quality score card -->
+      <div class="dc">
+        <div><div class="ct">Platform Data Quality Score</div><div class="cs">overall health of records in the system</div></div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;padding:16px 0;">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="45" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+            <circle id="dqRing" cx="55" cy="55" r="45" fill="none" stroke="var(--green)" stroke-width="10"
+              stroke-dasharray="283" stroke-dashoffset="283"
+              stroke-linecap="round" transform="rotate(-90 55 55)"
+              style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)"/>
+            <text id="dqScore" x="55" y="60" text-anchor="middle" font-size="22" font-weight="700" fill="var(--green)" font-family="DM Sans,sans-serif">—</text>
+          </svg>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div id="dqBadge"></div>
+            <div style="font-size:11px;color:var(--text-3);line-height:1.5;" id="dqDesc">Calculating platform data quality…</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div id="dqBreakdown"></div>
+      </div>
+
+      <!-- Issues list -->
+      <div class="dc">
+        <div><div class="ct">Data Issues Found</div><div class="cs">records that may affect platform performance</div></div>
+        <div id="issuesList"><div class="shim" style="height:40px;margin-bottom:8px;"></div><div class="shim" style="height:40px;margin-bottom:8px;"></div><div class="shim" style="height:40px;"></div></div>
+      </div>
+    </div>
+
+    <!-- Job quality detail -->
+    <div class="dc">
+      <div><div class="ct">Job Listing Quality Detail</div><div class="cs">from current batch — completeness of job data</div></div>
+      <div style="overflow-x:auto;">
+        <table class="dq-table">
+          <thead><tr>
+            <th>Field</th><th>Complete</th><th>Missing</th><th>% Complete</th><th>Impact</th>
+          </tr></thead>
+          <tbody id="dqTableBody"><tr><td colspan="5"><div class="shim" style="height:28px;border-radius:6px;"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       TAB 5: AI INSIGHTS
+  ════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-aiinsights">
+
+    <div class="g23">
+
+      <!-- AI Analysis -->
+      <div class="dc" style="gap:14px;">
+        <div>
+          <div class="ct" style="margin-bottom:4px;">✦ AI Platform Analyst</div>
+          <div class="cs">AI analyses your live platform metrics via the BeyondMatch LLM proxy</div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="ai-btn" id="aiAnalyseBtn" onclick="runAIAnalysis()">
+            <span id="aiBtnIcon">✦</span>
+            <span id="aiBtnText">Analyse Platform Health</span>
+          </button>
+          <button class="ai-btn" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.3);color:var(--amber);" onclick="runAIAnalysis('growth')">
+            📈 Growth Insights
+          </button>
+          <button class="ai-btn" style="background:var(--red-dim);border-color:rgba(248,113,113,0.3);color:var(--red);" onclick="runAIAnalysis('risk')">
+            ⚠ Risk Analysis
+          </button>
+        </div>
+
+        <div id="aiOutput" class="ai-output loading">
+          Click "Analyse Platform Health" to get AI-powered recommendations based on your live metrics…
+        </div>
+      </div>
+
+      <!-- Insight cards (populated after AI runs) -->
+      <div class="dc" style="gap:10px;">
+        <div><div class="ct" style="margin-bottom:4px;">Quick Recommendations</div><div class="cs">auto-generated from platform data</div></div>
+        <div id="insightCards">
+          <!-- Pre-computed insights from data (no AI needed) -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Historical context for AI -->
+    <div class="dc">
+      <div><div class="ct">Metrics Context Sent to AI</div><div class="cs">the data snapshot used for analysis</div></div>
+      <pre id="aiContext" style="font-family:var(--mono);font-size:10.5px;color:var(--text-3);line-height:1.6;white-space:pre-wrap;max-height:200px;overflow-y:auto;">Loading metrics…</pre>
+    </div>
+
+  </div>
+
+</main>
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="admin.js"></script>
+</body>
+</html>

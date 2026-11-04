@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jobs – BeyondMatch</title>
+  <link rel="stylesheet" href="recruiter-matches.css" />
+  <link rel="stylesheet" href="skeleton-loader.css" />
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/rec-jobs.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="menu">
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l-1.41-1.41M17.66 6.34l-1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html" class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html" class="menu-item">Post Job</a>
+    <a href="rec-jobs.html" class="menu-item">My Jobs</a>
+    <a href="jobs.html" class="menu-item active">Jobs</a>
+    <a href="cand-matches.html" class="menu-item">Candidate Matches</a>
+    <a href="rec-locatehire.html" class="menu-item">CandidateMap</a>
+    <a href="rec-leads.html" class="menu-item">Find Leads</a>
+    <a href="rec-actions.html" class="menu-item">Recruiter Actions</a>
+    <a href="settings.html" class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+  </nav>
+</aside>
+
+<main class="main jobs-modern">
+  <div class="jobs-topbar">
+    <div class="page-header-modern">
+      <h1 id="jobsPageTitle">UK Jobs <span class="uk-flag-badge" id="jobsFlagBadge">🇬🇧 United Kingdom only</span></h1>
+    </div>
+
+    <div class="jobs-filter-modern">
+    <div class="toggle-modern">
+      <button id="jobsRemoteBtn" class="toggle-pill active">Remote</button>
+      <button id="jobsOthersBtn" class="toggle-pill secondary">Others</button>
+    </div>
+
+    <select id="jobsSortSelect" class="modern-select">
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+      <option value="title">Title A–Z</option>
+    </select>
+
+    <input type="text" id="jobsSearchInput" class="modern-search input" placeholder="Search job title…" />
+
+    <button type="button" id="jobsExportBtn" class="export-xlsx-btn" title="Download the jobs currently shown as an Excel file">
+      ⬇️ Export Excel
+    </button>
+    </div>
+  </div>
+
+  <div class="location-tabs-row" id="jobsCountryTabs">
+    <button type="button" class="loc-tab active" data-country="uk">🇬🇧 UK <span class="loc-count" id="jobsCount-uk">0</span></button>
+    <button type="button" class="loc-tab" data-country="usa">🇺🇸 USA <span class="loc-count" id="jobsCount-usa">0</span></button>
+    <button type="button" class="loc-tab" data-country="uae">🇦🇪 UAE <span class="loc-count" id="jobsCount-uae">0</span></button>
+    <button type="button" class="loc-tab" data-country="india">🇮🇳 India <span class="loc-count" id="jobsCount-india">0</span></button>
+    <button type="button" class="loc-tab" data-country="germany">🇩🇪 Germany <span class="loc-count" id="jobsCount-germany">0</span></button>
+    <button type="button" class="loc-tab" data-country="france">🇫🇷 France <span class="loc-count" id="jobsCount-france">0</span></button>
+  </div>
+
+  <div class="jobs-summary-row">
+    <span id="jobsRemoteLabel">🇬🇧 Remote: <strong id="jobsRemoteCount" style="color:#7aa2ff;">0</strong></span>
+    <span>📍 Others: <strong id="jobsOthersCount" style="color:#7aa2ff;">0</strong></span>
+    <span>Total <span id="jobsTotalLabel">UK</span> jobs: <strong id="jobsTotalCount" style="color:#4ade80;">0</strong></span>
+  </div>
+
+  <div class="jobs-grid-wrapper">
+    <div id="jobsGrid" class="jobs-grid"></div>
+  </div>
+</main>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+
+</body>
+</html>

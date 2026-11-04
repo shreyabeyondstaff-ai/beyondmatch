@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post a Job – BeyondMatch</title>
+  <link rel="stylesheet" href="recruiter-matches.css" />
+
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+<div id="lbar"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="/rec-dash.html" style="text-decoration:none;"><h2 class="brand">BeyondMatch</h2></a>
+  <nav class="menu">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html"     class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html"  class="menu-item active">Post a Job</a>
+    <a href="rec-jobs.html"     class="menu-item">My Jobs</a>
+    <a href="jobs.html" class="menu-item">Jobs</a>
+    <a href="cand-matches.html" class="menu-item">Candidate Matches</a>
+    <a href="rec-locatehire.html" class="menu-item">CandidateMap</a>
+     <a href="rec-leads.html" class="menu-item">Find Leads</a>
+    <a href="rec-actions.html"  class="menu-item">Recruiter Actions</a>
+    <a href="settings.html"     class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+
+  </nav>
+</aside>
+
+<main class="main">
+
+  <!-- HEADER — pinned, never scrolls -->
+  <div class="ph">
+    <div>
+      <h1>Post a Job</h1>
+      <p id="sub">Fill in the details below or switch to Upload JD</p>
+    </div>
+    <div class="mtoggle">
+      <button class="mtab on" id="tMan" onclick="mode('manual')">✏️ &nbsp;Manual Entry</button>
+      <button class="mtab"    id="tUp"  onclick="mode('upload')">📄 &nbsp;Upload JD</button>
+    </div>
+  </div>
+
+  <!-- BANNERS -->
+  <div id="okBanner">
+    <span style="font-size:22px;flex-shrink:0;">🎉</span>
+    <div>
+      <strong>Job posted successfully!</strong>
+      <div style="font-size:12px;opacity:.8;margin-top:2px;">
+        Your listing is live and will be matched against candidates.
+        <a href="rec-jobs.html" style="color:var(--blue);text-decoration:none;font-weight:700;"> View My Jobs →</a>
+      </div>
+    </div>
+  </div>
+  <div id="errBanner"></div>
+
+  <!-- SCROLLABLE PANEL — everything here scrolls -->
+  <div id="panel">
+
+    <!-- ══ UPLOAD MODE ══ -->
+    <div id="upPanel" style="display:none;flex-direction:column;gap:12px;">
+
+      <div class="card">
+        <div class="slabel">Upload Job Description</div>
+
+        <div class="dz" id="dz">
+          <label for="fileInput">
+            <span class="dz-icon">📋</span>
+            <span class="dz-title">Drop your JD here</span>
+            <p class="dz-sub">Supports <em>PDF, DOCX, TXT</em><br>We'll extract the text and auto-fill the form</p>
+            <span class="dz-hint">or click to browse files</span>
+          </label>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" />
+
+        <div class="fchosen" id="fchosen">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="fname">—</span>
+          <button onclick="clearFile()">×</button>
+        </div>
+
+        <div class="pprog" id="pprog">
+          <div class="spin"></div>
+          <span>Extracting text from your document…</span>
+        </div>
+
+        <div class="jdx" id="jdx">
+          <div class="jdxh">
+            <span>Extracted Text</span>
+            <button class="aib" id="aibtn" onclick="aiParse()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Auto-fill form with AI
+            </button>
+          </div>
+          <textarea id="jdText" rows="8" placeholder="Extracted text will appear here…"></textarea>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span style="font-size:20px;flex-shrink:0;">💡</span>
+        <div class="tip-body">
+          <div class="tip-title">How it works</div>
+          Upload your JD as PDF, DOCX, or plain text. We extract the content, then AI parses the title, location,
+          salary, skills and description — and auto-fills the Manual Entry form. Review everything before posting.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MANUAL FORM MODE ══ -->
+    <div id="manPanel" style="display:flex;flex-direction:column;gap:0;">
+      <div class="card">
+        <div class="slabel">Job Details</div>
+        <div class="fg">
+
+          <!-- Title -->
+          <div class="f full">
+            <label>Job Title <span class="req">*</span></label>
+            <input type="text" id="f_title" placeholder="e.g. Senior Software Engineer" maxlength="120" oninput="cc(this,'tc')" />
+            <div class="ch"><span id="tc">0</span> / 120</div>
+          </div>
+
+          <!-- Location + Work Mode -->
+          <div class="f">
+            <label>Location <span class="req">*</span></label>
+            <input type="text" id="f_loc" placeholder="e.g. San Francisco, CA" />
+          </div>
+          <div class="f">
+            <label>Work Mode</label>
+            <select id="f_rem">
+              <option value="onsite">On-site</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+
+          <!-- Employment type pills -->
+          <div class="f full">
+            <label>Employment Type</label>
+            <div class="pg" id="pills">
+              <button class="tp on" data-v="Full-time">Full-time</button>
+              <button class="tp" data-v="Part-time">Part-time</button>
+              <button class="tp" data-v="Contract">Contract</button>
+              <button class="tp" data-v="Internship">Internship</button>
+              <button class="tp" data-v="Freelance">Freelance</button>
+            </div>
+          </div>
+
+          <div class="div"></div>
+
+          <!-- Salary -->
+          <div class="f full salary-row">
+            <div class="f">
+              <label>Currency</label>
+              <select id="f_cur">
+                <option value="USD" data-sym="$">USD – US Dollar</option>
+                <option value="EUR" data-sym="€">EUR – Euro</option>
+                <option value="GBP" data-sym="£">GBP – British Pound</option>
+                <option value="INR" data-sym="₹">INR – Indian Rupee</option>
+                <option value="AUD" data-sym="A$">AUD – Australian Dollar</option>
+                <option value="CAD" data-sym="C$">CAD – Canadian Dollar</option>
+                <option value="SGD" data-sym="S$">SGD – Singapore Dollar</option>
+                <option value="AED" data-sym="AED">AED – UAE Dirham</option>
+                <option value="JPY" data-sym="¥">JPY – Japanese Yen</option>
+              </select>
+            </div>
+            <div class="f">
+              <label>Salary Min (<span class="cur-code">USD</span> / yr)</label>
+              <div class="sw"><span class="ss cur-sym">$</span><input type="number" id="f_smin" placeholder="60000" min="0" /></div>
+            </div>
+            <div class="f">
+              <label>Salary Max (<span class="cur-code">USD</span> / yr)</label>
+              <div class="sw"><span class="ss cur-sym">$</span><input type="number" id="f_smax" placeholder="120000" min="0" /></div>
+            </div>
+          </div>
+
+          <!-- Experience + Level -->
+          <div class="f">
+            <label>Experience Required</label>
+            <select id="f_exp">
+              <option value="">Any</option>
+              <option value="0-1">0 – 1 year</option>
+              <option value="1-3">1 – 3 years</option>
+              <option value="3-5">3 – 5 years</option>
+              <option value="5-8">5 – 8 years</option>
+              <option value="8+">8+ years</option>
+            </select>
+          </div>
+          <div class="f">
+            <label>Seniority Level</label>
+            <select id="f_lvl">
+              <option value="">Unspecified</option>
+              <option value="Junior">Junior</option>
+              <option value="Mid">Mid-level</option>
+              <option value="Senior">Senior</option>
+              <option value="Lead">Lead / Principal</option>
+              <option value="Manager">Manager</option>
+              <option value="Director">Director</option>
+              <option value="VP">VP / C-Suite</option>
+            </select>
+          </div>
+
+          <div class="div"></div>
+
+          <!-- Skills -->
+          <div class="f full">
+            <label>Required Skills</label>
+            <div class="skw" id="skw" onclick="document.getElementById('skIn').focus()">
+              <input id="skIn" placeholder="Type a skill and press Enter or comma…" autocomplete="off" />
+            </div>
+            <div class="hint">Press
+              <kbd style="background:rgba(122,162,255,.1);border:1px solid var(--blue-line);padding:1px 5px;border-radius:4px;font-size:10px;">Enter</kbd>
+              or
+              <kbd style="background:rgba(122,162,255,.1);border:1px solid var(--blue-line);padding:1px 5px;border-radius:4px;font-size:10px;">,</kbd>
+              to add a skill
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="f full">
+            <label>Job Description <span class="req">*</span></label>
+            <textarea id="f_desc" rows="7" placeholder="Describe responsibilities, requirements, and what you're looking for…" oninput="cc(this,'dc')"></textarea>
+            <div class="ch"><span id="dc">0</span> characters</div>
+          </div>
+
+          <!-- Industry + Function -->
+          <div class="f">
+            <label>Industry</label>
+            <select id="f_ind">
+              <option value="">Select industry</option>
+              <option>Technology</option><option>Finance</option>
+              <option>Healthcare</option><option>E-commerce</option>
+              <option>Education</option><option>Manufacturing</option>
+              <option>Media &amp; Entertainment</option><option>Consulting</option>
+              <option>Government</option><option>Non-profit</option><option>Other</option>
+            </select>
+          </div>
+          <div class="f">
+            <label>Job Function</label>
+            <select id="f_fun">
+              <option value="">Select function</option>
+              <option>Engineering</option><option>Data Science / Analytics</option>
+              <option>Design / UX</option><option>Product Management</option>
+              <option>Marketing</option><option>Sales</option><option>Operations</option>
+              <option>HR / Talent</option><option>Finance / Accounting</option>
+              <option>Legal</option><option>Customer Success</option><option>Other</option>
+            </select>
+          </div>
+
+          <!-- Deadline + Openings -->
+          <div class="f">
+            <label>Application Deadline</label>
+            <input type="date" id="f_dl" />
+          </div>
+          <div class="f">
+            <label>No. of Openings</label>
+            <input type="number" id="f_op" min="1" value="1" />
+          </div>
+
+          <!-- Apply Link -->
+          <div class="f full">
+            <label>Application Link <span style="color:var(--text-3);font-weight:400;">(optional)</span></label>
+            <input type="url" id="f_apply" placeholder="https://company.com/careers/apply-here" />
+            <div class="hint">
+              BeyondMatch jobs use the built-in apply flow — candidates apply directly through the platform.
+              Only fill this in if you want to send candidates to an external careers page instead.
+            </div>
+          </div>
+
+        </div><!-- /fg -->
+      </div><!-- /card -->
+      <div class="tail"></div>
+    </div><!-- /manPanel -->
+
+  </div><!-- /panel -->
+
+  <!-- SUBMIT ROW — pinned at bottom -->
+  <div class="subrow">
+    <button class="btn2" onclick="resetForm()">Clear Form</button>
+    <button class="btn1" id="subBtn" onclick="submitJob()">
+      <div class="bspin"></div>
+      <span class="blbl">Post Job →</span>
+    </button>
+  </div>
+
+</main>
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+</body>
+</html>

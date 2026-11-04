@@ -1,0 +1,312 @@
+rules_version = '2';
+
+// SEC-01: roles and admin access.
+//
+// IMPORTANT: this file only defines the rules for users/{uid}, candidates/{id},
+// applications, notifications, saved_jobs, posted_jobs and config/*.
+// The project's currently deployed ruleset (Firebase console) was not in the
+// repository. Merge these blocks into it before deploying - deploying this
+// file on its own would deny every other collection (candidates,
+// applications, notifications, posted_jobs, saved_jobs). When merging, make
+// sure no broader rule (e.g. `match /{document=**}` or `match /users/{...}`
+// with `allow write: if request.auth != null`) also matches these paths:
+// Firestore grants access if ANY matching rule allows it.
+//
+// The authoritative role is the `role` custom claim on the ID token
+// (request.auth.token.role), set only via the Firebase Admin SDK.
+// users/{uid}.role is legacy, routing-only data and is never trusted here.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn()   { return request.auth != null; }
+    function isSelf(uid)  { return signedIn() && request.auth.uid == uid; }
+    function isAdmin()    { return signedIn() && request.auth.token.role == 'admin'; }
+    function isRecruiter() { return signedIn() && request.auth.token.role == 'recruiter'; }
+
+    match /users/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+
+      // Self-service signup may record at most the least-privileged role.
+      // "recruiter" and "admin" are issued server-side as custom claims.
+      allow create: if isSelf(uid)
+        && (!('role' in request.resource.data)
+            || request.resource.data.role == 'candidate');
+
+      // A user may edit their own profile fields but never `role`
+      // (adding, changing or removing it).
+      allow update: if isSelf(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+
+      // Account deletion (settings.js). A re-created doc is still limited
+      // by the create rule above.
+      allow delete: if isSelf(uid);
+    }
+
+    // SEC-06: candidate profiles (name, email, resume_text, location).
+    //
+    //  - A candidate can read, create, update and delete only documents that
+    //    carry their own user_id (legacy docs written before user_id existed
+    //    are also readable by the account whose token email they hold).
+    //  - Listing is limited to a candidate's own documents (the app queries
+    //    where user_id == uid, or where email == their token email) or to an
+    //    admin. A recruiter can NOT list or bulk-read the collection.
+    //  - A recruiter can fetch a single document by id (the app only does
+    //    that for candidates the backend matched or that applied to them).
+    //    Firestore rules cannot see the backend's match results, so this is
+    //    an interim allowance: a recruiter who knows or guesses an id can
+    //    read that document. See LAMBDA_CHANGES.md L-06 to remove it.
+    //  - Recruiters never write candidate documents.
+    //  - Roles come from custom claims only, never from users/{uid}.role.
+    match /candidates/{candidateId} {
+      function ownsDoc() {
+        return signedIn() && (
+          resource.data.user_id == request.auth.uid
+          || resource.data.email == request.auth.token.email);
+      }
+
+      // `resource == null` lets a signed-in user's existence check on a
+      // missing document return "not found" instead of permission-denied.
+      allow get: if signedIn()
+        && (resource == null || ownsDoc() || isAdmin() || isRecruiter());
+
+      allow list: if ownsDoc() || isAdmin();
+
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid;
+
+      allow update: if signedIn()
+        && resource.data.user_id == request.auth.uid
+        && request.resource.data.user_id == request.auth.uid;
+
+      allow delete: if signedIn()
+        && resource.data.user_id == request.auth.uid;
+    }
+
+    // SEC-11: workflow records (applications, notifications, saved jobs,
+    // posted jobs). The browser may still create these, but every field that
+    // says WHO did something is checked against request.auth, and every
+    // notification is tied to a real application or candidate, so one user
+    // cannot write as, or to the account of, someone else. Roles come from
+    // custom claims only.
+    //
+    // Residual limit (rules cannot see backend job data): a candidate can
+    // address an application to any recruiter_id. See LAMBDA_CHANGES.md L-08.
+
+    match /applications/{appId} {
+      function candDoc(id) {
+        return get(/databases/$(database)/documents/candidates/$(id)).data;
+      }
+
+      // Parties to an application, and admins, may read it.
+      allow get, list: if signedIn() && (
+        resource.data.candidate_user_id == request.auth.uid
+        || resource.data.recruiter_id == request.auth.uid
+        || isAdmin());
+
+      // Only a candidate, only for themselves, only as a fresh "applied"
+      // application. Status, history and unread flags cannot be preset.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+             'job_id', 'job_firestore_id', 'job_title', 'company_name',
+             'candidate_id', 'candidate_user_id', 'candidate_name',
+             'candidate_email', 'candidate_role', 'recruiter_id',
+             'status', 'note', 'rec_unread', 'cand_unread', 'status_history',
+             'applied_at', 'updated_at'])
+        && request.resource.data.keys().hasAll([
+             'job_id', 'job_title', 'candidate_id', 'candidate_user_id',
+             'recruiter_id', 'status', 'applied_at', 'updated_at'])
+        && request.resource.data.candidate_user_id == request.auth.uid
+        && request.resource.data.recruiter_id is string
+        && request.resource.data.recruiter_id != request.auth.uid
+        && request.resource.data.job_id is string
+        && request.resource.data.job_id.size() > 0
+        && request.resource.data.job_id.size() <= 200
+        && request.resource.data.job_title is string
+        && request.resource.data.job_title.size() <= 300
+        && request.resource.data.candidate_name is string
+        && request.resource.data.candidate_name.size() <= 200
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 5000
+        && request.resource.data.status == 'applied'
+        && request.resource.data.status_history == []
+        && request.resource.data.rec_unread == true
+        && request.resource.data.cand_unread == false
+        && request.resource.data.applied_at == request.time
+        && request.resource.data.updated_at == request.time
+        && candDoc(request.resource.data.candidate_id).user_id == request.auth.uid
+        && (request.resource.data.candidate_email == request.auth.token.email
+            || request.resource.data.candidate_email == candDoc(request.resource.data.candidate_id).email);
+
+      allow update: if signedIn() && (
+        // The candidate may only mark it as seen.
+        (resource.data.candidate_user_id == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cand_unread'])
+          && request.resource.data.cand_unread == false)
+        ||
+        // The recruiter it is addressed to may move it through the pipeline,
+        // keep a private note and clear their own unread flag. Nothing that
+        // says who applied, to what, or for whom can change.
+        (isRecruiter()
+          && resource.data.recruiter_id == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(
+               ['status', 'updated_at', 'cand_unread', 'rec_note', 'note_updated_at', 'rec_unread'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
+              || request.resource.data.status in ['reviewing', 'shortlisted', 'interview', 'hired', 'rejected'])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['updated_at'])
+              || request.resource.data.updated_at == request.time)
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['note_updated_at'])
+              || request.resource.data.note_updated_at == request.time)
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['rec_note'])
+              || (request.resource.data.rec_note is string && request.resource.data.rec_note.size() <= 5000))
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['cand_unread'])
+              || request.resource.data.cand_unread == true)
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['rec_unread'])
+              || request.resource.data.rec_unread == false))
+      );
+
+      // A candidate may delete the applications they sent (account deletion,
+      // SEC-13). Nobody else can delete one.
+      allow delete: if signedIn() && resource.data.candidate_user_id == request.auth.uid;
+    }
+
+    match /notifications/{notificationId} {
+      function appData(id) {
+        return get(/databases/$(database)/documents/applications/$(id)).data;
+      }
+
+      // Candidate -> recruiter: "X applied". Tied to a real application that
+      // belongs to the sender and is addressed to the recipient.
+      function isNewApplication() {
+        let d = request.resource.data;
+        return d.type == 'new_application'
+          && d.from_role == 'candidate' && d.to_role == 'recruiter'
+          && d.keys().hasOnly([
+               'to_user_id', 'to_role', 'from_role', 'from_user_id', 'type',
+               'app_id', 'job_id', 'job_title', 'candidate_name', 'message',
+               'read', 'created_at'])
+          && d.candidate_name is string && d.candidate_name.size() <= 200
+          && d.app_id is string
+          && exists(/databases/$(database)/documents/applications/$(d.app_id))
+          && appData(d.app_id).candidate_user_id == request.auth.uid
+          && appData(d.app_id).recruiter_id == d.to_user_id
+          && appData(d.app_id).job_id == d.job_id;
+      }
+
+      // Recruiter -> candidate: "your status changed". Tied to the
+      // recruiter's own application, the real applicant, and the status the
+      // application actually has.
+      function isStatusUpdate() {
+        let d = request.resource.data;
+        return d.type == 'status_update'
+          && isRecruiter()
+          && d.from_role == 'recruiter' && d.to_role == 'candidate'
+          && d.keys().hasOnly([
+               'to_user_id', 'to_role', 'from_role', 'from_user_id', 'type',
+               'app_id', 'job_title', 'new_status', 'message', 'read',
+               'created_at'])
+          && d.app_id is string
+          && exists(/databases/$(database)/documents/applications/$(d.app_id))
+          && appData(d.app_id).recruiter_id == request.auth.uid
+          && appData(d.app_id).candidate_user_id == d.to_user_id
+          && appData(d.app_id).status == d.new_status;
+      }
+
+      // Recruiter -> candidate: "apply to this job". The recipient must be the
+      // real owner of the named candidate, and the link must stay inside the
+      // app (no external URLs in a notification that looks official).
+      function isInvite() {
+        let d = request.resource.data;
+        return d.type == 'invite_to_apply'
+          && isRecruiter()
+          && d.from_role == 'recruiter' && d.to_role == 'candidate'
+          && d.keys().hasOnly([
+               'to_user_id', 'to_role', 'from_role', 'from_user_id', 'type',
+               'job_id', 'job_title', 'recruiter_id', 'recruiter_name',
+               'candidate_id', 'message', 'apply_url', 'read', 'created_at'])
+          && d.recruiter_id == request.auth.uid
+          && d.recruiter_name is string && d.recruiter_name.size() <= 200
+          && d.candidate_id is string
+          && get(/databases/$(database)/documents/candidates/$(d.candidate_id)).data.user_id == d.to_user_id
+          && d.apply_url is string
+          && d.apply_url.size() <= 1000
+          && d.apply_url.matches('jobmatches\\.html\\?apply=[^ ]*');
+      }
+
+      // A notification is readable by its recipient and by its sender.
+      allow get, list: if signedIn()
+        && (resource.data.to_user_id == request.auth.uid
+            || resource.data.from_user_id == request.auth.uid);
+
+      allow create: if signedIn()
+        && request.resource.data.from_user_id == request.auth.uid
+        && request.resource.data.to_user_id is string
+        && request.resource.data.to_user_id != request.auth.uid
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.job_title is string
+        && request.resource.data.job_title.size() <= 300
+        && request.resource.data.read == false
+        && request.resource.data.created_at == request.time
+        && (isNewApplication() || isStatusUpdate() || isInvite());
+
+      // The recipient may mark it read, and nothing else.
+      allow update: if signedIn()
+        && resource.data.to_user_id == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+        && request.resource.data.read == true;
+
+      // Recipient or sender may delete (account deletion, SEC-13). Nobody else.
+      allow delete: if signedIn()
+        && (resource.data.to_user_id == request.auth.uid
+            || resource.data.from_user_id == request.auth.uid);
+    }
+
+    // Saved jobs: private to one user. The document id is
+    // "<uid>_<candidateId>_<jobId>", so its prefix proves who owns it.
+    match /saved_jobs/{savedId} {
+      allow get, list: if signedIn() && resource.data.user_id == request.auth.uid;
+
+      allow create, update: if signedIn()
+        && request.resource.data.user_id == request.auth.uid
+        && savedId.matches(request.auth.uid + '_.*')
+        && request.resource.data.keys().hasOnly([
+             'user_id', 'candidate_id', 'job_id', 'title', 'company', 'location',
+             'salary_min', 'salary_max', 'description', 'apply_url', 'savedAt'])
+        && request.resource.data.job_id is string
+        && request.resource.data.title is string
+        && request.resource.data.title.size() <= 300
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 50000
+        && request.resource.data.savedAt == request.time;
+
+      allow delete: if signedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    // Posted jobs (the Firestore mirror of a recruiter's job posting): any
+    // signed-in user may read them (candidates look jobs up by job_id), only
+    // a recruiter may create one, only in their own name, and no one edits one
+    // from the client. Only the owner may delete.
+    match /posted_jobs/{postedJobId} {
+      allow get, list: if signedIn();
+
+      // The recruiter's email is not stored on the mirror (SEC-13).
+      allow create: if isRecruiter()
+        && request.resource.data.recruiter_id == request.auth.uid
+        && !('recruiter_email' in request.resource.data)
+        && request.resource.data.source == 'beyondmatch'
+        && request.resource.data.created_at == request.time;
+
+      allow update: if false;
+
+      // The owner may delete their own postings (account deletion, SEC-13).
+      allow delete: if signedIn() && resource.data.recruiter_id == request.auth.uid;
+    }
+
+    // config/adminKey (the retired client-side admin key) and any other
+    // config docs are server-only.
+    match /config/{docId} {
+      allow read, write: if false;
+    }
+  }
+}

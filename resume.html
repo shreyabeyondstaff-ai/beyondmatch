@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resume Analysis – BeyondMatch</title>
+<link rel="stylesheet" href="cand.css" />
+
+  <link rel="stylesheet" href="cand-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="cand-sidebar">
+<a href="/resume.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="cand-menu">
+    <a href="/candidate-dashboard.html" class="cand-menu-item">Dashboard</a>
+    <a href="/resume.html"              class="cand-menu-item active">Resume Analysis</a>
+    <a href="/jobmatches.html"          class="cand-menu-item">Job Matches</a>
+    <a href="/locatehire.html"          class="cand-menu-item">LocateHire</a>
+        <a href="/cand_actions.html"           class="cand-menu-item">Candidate Actions</a>
+    <a href="/settings.html"            class="cand-menu-item">Settings</a>
+    <a href="/savedjobs.html"           class="cand-menu-item">Saved Jobs</a>
+    <button class="logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+  </nav>
+</aside>
+
+<!-- ANALYZING OVERLAY -->
+<div class="analyzing-overlay" id="analyzingOverlay">
+  <div class="big-spinner"></div>
+  <p>Analyzing your resume…</p>
+  <small>AI is scoring your profile against ATS systems</small>
+</div>
+
+<!-- MAIN -->
+<main class="cand-main">
+
+  <div class="cand-page-title">
+    <h1>ATS Matching &amp; Optimization Report</h1>
+    <p>Upload your resume to get an AI-powered ATS score, skill insights, and keyword feedback.</p>
+  </div>
+
+  <div id="autoStatusMsg" style="display:none; font-size:13px; margin-bottom:16px; padding:10px 14px; background:rgba(122,162,255,0.07); border:1px solid rgba(122,162,255,0.15); border-radius:10px;"></div>
+
+  <div id="currentResumeBar" style="display:none; align-items:center; gap:10px; margin-bottom:16px; padding:10px 14px; background:rgba(34,197,94,0.07); border:1px solid rgba(34,197,94,0.15); border-radius:10px;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    <span style="font-size:13px; color:var(--green);">Showing analysis for: <strong id="currentResumeName"></strong></span>
+  </div>
+
+  <!-- TOP ROW -->
+  <div class="resume-top-row">
+
+    <!-- UPLOAD -->
+    <div class="cand-card" id="uploadCard">
+      <p class="section-label">Update Resume</p>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Your signup resume is loaded automatically. Upload a new file below only if you want to update it.</p>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" />
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <p><strong>Drag &amp; Drop a PDF resume here</strong></p>
+        <small>or click to upload &nbsp;·&nbsp; PDF / DOCX</small>
+      </div>
+
+      <div class="file-info" id="fileInfo">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span id="fileName">resume.pdf</span>
+        <button class="file-remove" id="removeFile">✕</button>
+      </div>
+
+      <div class="parse-status" id="parseStatus">
+        <div class="spinner"></div>
+        <span>Parsing resume content…</span>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" disabled>Analyze Resume</button>
+    </div>
+
+    <!-- SCORE -->
+    <div class="cand-card score-card">
+      <p class="section-label">Real-Time Match &amp; Insights</p>
+
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 180 110" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#7aa2ff"/>
+              <stop offset="100%" stop-color="#4ade80"/>
+            </linearGradient>
+          </defs>
+          <path class="gauge-bg"
+            d="M 18 96 A 72 72 0 0 1 162 96"
+            stroke-dasharray="226 226" />
+          <path class="gauge-fill" id="gaugeFill"
+            d="M 18 96 A 72 72 0 0 1 162 96"
+            stroke-dasharray="226 226"
+            stroke-dashoffset="226" />
+        </svg>
+        <div class="gauge-center">
+          <div class="gauge-num" id="atsScore">--</div>
+          <div class="gauge-sub">ATS MATCH SCORE</div>
+        </div>
+      </div>
+
+      <div id="scoreBadge"></div>
+
+      <div class="skill-bars" id="skillBars">
+        <p class="empty-note">Awaiting analysis…</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="resume-bot-row">
+
+    <!-- INSIGHTS -->
+    <div class="cand-card">
+      <p class="section-label">Insights &amp; Actionable Feedback</p>
+
+      <div id="insightsPlaceholder" style="padding:32px 0; text-align:center; color:var(--text-muted); font-size:13px;">
+        Upload and analyze a resume to see strengths, weaknesses, and keyword gaps.
+      </div>
+
+      <div class="insights-grid" id="insightsGrid" style="display:none;">
+        <div class="insight-col str">
+          <h4>Top Strengths Found</h4>
+          <ul id="strengthsList"></ul>
+        </div>
+        <div class="insight-col weak">
+          <h4>Resume Weaknesses Identified</h4>
+          <ul id="weaknessesList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COL -->
+    <div class="right-col">
+
+      <!-- KEYWORDS -->
+      <div class="cand-card">
+        <p class="section-label">Keyword Optimization</p>
+        <div id="kwPlaceholder" style="font-size:12px; color:var(--text-muted); padding:8px 0;">
+          Run an analysis to see keyword gaps.
+        </div>
+        <div id="kwContent" style="display:none;">
+          <div class="kw-group missing">
+            <h4>Missing Key Terms</h4>
+            <div class="kw-tags" id="missingTags"></div>
+          </div>
+          <div class="kw-group found" style="margin-top:14px;">
+            <h4>Found Key Terms</h4>
+            <div class="kw-tags" id="foundTags"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUGGESTIONS -->
+      <div class="cand-card">
+        <p class="section-label">Immediate Optimization Suggestions</p>
+        <div id="sugPlaceholder" style="font-size:12px; color:var(--text-muted); padding:8px 0;">
+          AI suggestions will appear here after analysis.
+        </div>
+        <div id="suggestionsList"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<!-- PDF.js + Mammoth -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.13.0/mammoth.browser.min.js" integrity="sha384-8NWE3bZDrmRI4IePMoQaEoLhAQ1MmRMJkdNgnGiHRFanTqsFKr0TmK6aSZvFJ/PO" crossorigin="anonymous"></script>
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="candidate.js"></script>
+
+</body>
+</html>

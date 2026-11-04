@@ -1,0 +1,41 @@
+# secrets and environment
+.env
+.env.*
+# keys and credentials
+*-key.json
+*service-account*.json
+serviceAccount*.json
+firebase-adminsdk*.json
+*.pem
+*.p12
+*.pfx
+*.key
+# dependencies and caches
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+# local data exports, test output and logs
+*.csv
+*.xlsx
+*.xls
+*.zip
+*.log
+firebase-debug.log
+results*.json
+Testing/*results*.json
+*QUARANTINED*
+# editor, OS and tool folders
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+# documentation (kept local)
+*.md
+# local-only folders
+security-tests/
+Testing/
+tools/
+.github/

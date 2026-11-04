@@ -1,0 +1,399 @@
+/* ============================================================
+   BeyondMatch — shared theme layer
+   Link this AFTER your page's own stylesheet/inline <style>
+   (order doesn't actually matter — the [data-theme="light"]
+   attribute selector out-specificities a plain :root rule on
+   every page, so this always wins when theme=light).
+
+   Contains:
+     1) Light-mode values for every CSS variable name used
+        anywhere in the app (harmless no-ops on pages that
+        don't declare a given variable).
+     2) Fixes for the handful of hardcoded (non-variable)
+        colors that repeat across pages (scrollbars, sidebar
+        link color, <select> option bg, skeleton shimmer, etc).
+     3) The theme-toggle button used in every sidebar.
+   ============================================================ */
+
+/* ── 1) VARIABLE OVERRIDES (all pages, "recruiter/candidate" family) ── */
+html[data-theme="light"] {
+  /* surfaces */
+  --bg:            #eef1f7;
+  --bg-dark:       #eef1f7;
+  --bg-darker:     #e6eaf3;
+  --surface:       #ffffff;
+  --card:          #ffffff;
+  --card-hi:       #f6f8fd;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f3f6fc;
+  --card-hover:    rgba(58,95,217,0.05);
+
+  /* borders */
+  --border:        rgba(31,64,159,0.14);
+  --border-hi:     rgba(31,64,159,0.26);
+  --card-border:   rgba(31,64,159,0.13);
+  --border-bright: rgba(58,95,217,0.35);
+  --blue-line:     rgba(58,95,217,0.28);
+  --green-line:    rgba(21,128,61,0.26);
+  --red-line:      rgba(220,38,38,0.26);
+
+  /* accents */
+  --blue:          #3a5fd9;
+  --on-blue:       #ffffff;
+  --primary:       #5750d6;
+  --primary-light: #6f66ea;
+  --accent:        #2f6fe0;
+  --blue-dim:      rgba(58,95,217,0.10);
+  --green:         #157a3d;
+  --green-dim:     rgba(21,128,61,0.10);
+  --red:           #dc2626;
+  --red-dim:       rgba(220,38,38,0.08);
+  --amber:         #b45309;
+  --amber-dim:     rgba(180,83,9,0.10);
+  --purple:        #7c3aed;
+  --purple-dim:    rgba(124,58,237,0.10);
+  --cyan:          #0e7490;
+  --glow:          rgba(87,80,214,0.18);
+  --auth-err:      #dc2626;
+  --auth-ok:       #157a3d;
+
+  /* neutral "report/modal" palette used by JS-injected overlays
+     (Know More / AI analysis modals) — falls back to the dark hex
+     via var(--modal-x, #hex) when this isn't declared, i.e. in dark mode */
+  --modal-bg:         #ffffff;
+  --modal-bg-2:       #f6f8fd;
+  --modal-border:     #e2e8f4;
+  --modal-text:       #131a2c;
+  --modal-text-dim:   #46527a;
+  --modal-text-faint: #6b7a9e;
+  --modal-text-body:  #3d4766;
+  --modal-accent:     #7c3aed;
+
+  /* cand.css (resume.html) specific tokens */
+  --bg-2:          #e6eaf3;
+  --surface-2:     #ffffff;
+  --card-2:        #f6f8fd;
+  --input-bg:      #ffffff;
+  --menu-hover:    rgba(58,95,217,0.08);
+  --red-hover:     #b91c1c;
+
+  /* text */
+  --text-1:        #131a2c;
+  --text-primary:  #131a2c;
+  --text-2:        #46527a;
+  --text-secondary:#3d4766;
+  --text-3:        #6b7a9e;
+  --text-muted:    #5b6a95;
+}
+
+/* ── 2) NON-VARIABLE HARDCODED COLOR FIXES ── */
+
+/* scrollbars (repeats verbatim across every page) */
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c7d0e8; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+
+/* sidebar nav links: dark pages hardcode #a8b3d1 instead of a variable */
+html[data-theme="light"] .menu-item,
+html[data-theme="light"] .nav-link,
+html[data-theme="light"] .cand-menu-item {
+  color: #4b5675;
+}
+html[data-theme="light"] .menu-item:hover,
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .cand-menu-item:hover {
+  background: rgba(58,95,217,0.07);
+  color: var(--text-1);
+}
+html[data-theme="light"] .menu-item.active,
+html[data-theme="light"] .nav-link.active,
+html[data-theme="light"] .cand-menu-item.active {
+  background: var(--blue-dim);
+  border-color: var(--blue-line);
+  color: var(--blue);
+}
+
+/* text that reads fine as light text on a dark button/pill stays dark
+   navy in both themes today (#080c18) — but our light-mode blue is much
+   darker now, so buttons need white text for contrast in light mode */
+html[data-theme="light"] .btn,
+html[data-theme="light"] .view-btn:hover,
+html[data-theme="light"] .modern-view-btn:hover,
+html[data-theme="light"] .rbtn:hover {
+  color: #ffffff;
+}
+
+/* literal dark surface backgrounds used instead of var(--surface) */
+html[data-theme="light"] select option,
+html[data-theme="light"] .input,
+html[data-theme="light"] .f-select,
+html[data-theme="light"] .filter-select,
+html[data-theme="light"] input[type="text"],
+html[data-theme="light"] input[type="email"],
+html[data-theme="light"] input[type="password"],
+html[data-theme="light"] .auth-card input,
+html[data-theme="light"] .auth-card select,
+html[data-theme="light"] textarea,
+html[data-theme="light"] .toggle-group,
+html[data-theme="light"] .toggle-modern,
+html[data-theme="light"] .apply-modal,
+html[data-theme="light"] .powerbi-full iframe {
+  background-color: #ffffff;
+}
+
+/* circular progress-ring track (hardcoded #1b2140) */
+html[data-theme="light"] .ring-bg {
+  stroke: #dfe5f2 !important;
+}
+
+/* skeleton-loading shimmer gradients (hardcoded dark grays) */
+html[data-theme="light"] .shim,
+html[data-theme="light"] .skel,
+html[data-theme="light"] .skeleton,
+html[data-theme="light"] [class*="skeleton"] {
+  background: linear-gradient(90deg, #e7ecf6 25%, #f3f6fc 50%, #e7ecf6 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* dropdown-arrow / caret icon baked into a data-uri (recruiter-matches.css) */
+html[data-theme="light"] .input,
+html[data-theme="light"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a9e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* spinners: track ring is hardcoded as translucent white, invisible on light bg */
+html[data-theme="light"] .spinner,
+html[data-theme="light"] .big-spinner {
+  border-color: rgba(31,64,159,0.15);
+  border-top-color: var(--blue);
+}
+
+/* full-screen "analyzing" overlays: hardcoded dark scrim stays dark-translucent
+   in both themes on purpose (it's a modal backdrop, not page content) but we
+   lighten it slightly so it doesn't look like a dark-mode leftover */
+html[data-theme="light"] .analyzing-overlay {
+  background: rgba(238,241,247,0.9);
+}
+html[data-theme="light"] .analyzing-overlay p { color: var(--text-1); }
+
+/* index.html landing-page cards hardcode a dark-navy blend as the 2nd
+   gradient stop (rgba(13,18,36,x)) instead of a variable, so in light
+   mode they render as muddy gray-on-white boxes with poor text
+   contrast — swap in a clean white/tinted gradient instead */
+html[data-theme="light"] .match-card,
+html[data-theme="light"] .kpi-card,
+html[data-theme="light"] .feature-card,
+html[data-theme="light"] .tech-category,
+html[data-theme="light"] .flow-step,
+html[data-theme="light"] .architecture-diagram {
+  background: linear-gradient(135deg, #ffffff, #f5f7fd);
+}
+
+/* index.html's sticky navbar hardcodes a near-black background —
+   never adapts to light mode, so it stays a black bar even after
+   toggling the theme */
+html[data-theme="light"] .landing-navbar {
+  background: rgba(255,255,255,0.85);
+  border-bottom-color: var(--border);
+}
+
+/* index.html's login/signup modal card hardcodes a fully dark navy
+   gradient — it never adapted to light mode at all */
+html[data-theme="light"] .auth-card {
+  background: linear-gradient(135deg, #ffffff, #f5f7fd);
+  box-shadow: 0 20px 60px rgba(31,64,159,0.18);
+}
+html[data-theme="light"] .auth-overlay {
+  background: rgba(230,234,243,0.75);
+}
+
+/* generic soft shadows read as too heavy on white */
+html[data-theme="light"] .job-modern-card:hover,
+html[data-theme="light"] .card:hover {
+  box-shadow: 0 8px 24px rgba(31,64,159,0.12);
+}
+
+/* ── 3) LIGHT-MODE "POP OF COLOR" DECORATIVE LAYER ──
+   Soft gradient blobs + a small dot-grid tucked behind the top-right
+   of every main content pane, plus gradient-filled primary CTAs and
+   solid "active" pill states. Purely decorative — position:relative
+   + negative z-index keeps everything behind real content, so it's
+   safe to apply blindly across every page. Dark mode is untouched. */
+
+html[data-theme="light"] .main,
+html[data-theme="light"] .cand-main,
+html[data-theme="light"] .page-shell {
+  position: relative;
+  isolation: isolate; /* own stacking context, so the -1 z-index blobs below stay scoped inside and never slip behind the sidebar or body */
+}
+
+html[data-theme="light"] .main::before,
+html[data-theme="light"] .cand-main::before,
+html[data-theme="light"] .page-shell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(560px, 55%);
+  height: 380px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0) 45%),
+    radial-gradient(circle at 48% 38%, rgba(236,72,153,0.13) 0%, rgba(236,72,153,0) 42%),
+    radial-gradient(circle at 92% 52%, rgba(58,95,217,0.18) 0%, rgba(58,95,217,0) 45%);
+}
+
+html[data-theme="light"] .main::after,
+html[data-theme="light"] .cand-main::after,
+html[data-theme="light"] .page-shell::after {
+  content: "";
+  position: absolute;
+  top: 26px;
+  right: 56px;
+  width: 150px;
+  height: 100px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image: radial-gradient(circle, rgba(58,95,217,0.45) 1.4px, transparent 1.6px);
+  background-size: 16px 16px;
+}
+
+/* index.html's own hero already has a bespoke gradient + grid-line look;
+   just brighten its two ambient blobs slightly for light mode instead of
+   replacing them (dark-mode-tuned rgba values read as too faint on white) */
+html[data-theme="light"] .hero-wrapper {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.16) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(58,95,217,0.14) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+}
+
+/* colorful top accent strip on every card style used across the app */
+html[data-theme="light"] .job-modern-card,
+html[data-theme="light"] .job-card-modern,
+html[data-theme="light"] .cand-card,
+html[data-theme="light"] .action-card,
+html[data-theme="light"] .card,
+html[data-theme="light"] .settings-card,
+html[data-theme="light"] .bm-card {
+  position: relative;
+  overflow: hidden;
+}
+html[data-theme="light"] .job-modern-card::after,
+html[data-theme="light"] .job-card-modern::after,
+html[data-theme="light"] .cand-card::after,
+html[data-theme="light"] .action-card::after,
+html[data-theme="light"] .card::after,
+html[data-theme="light"] .settings-card::after,
+html[data-theme="light"] .bm-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--blue) 55%, var(--purple));
+  opacity: 0.9;
+}
+
+/* solid gradient "pop" on primary call-to-action buttons/pills */
+html[data-theme="light"] .modern-view-btn,
+html[data-theme="light"] .view-btn,
+html[data-theme="light"] .btn-primary,
+html[data-theme="light"] .bm-btn.primary,
+html[data-theme="light"] .analyze-btn,
+html[data-theme="light"] .ai-btn,
+html[data-theme="light"] .auth-btn,
+html[data-theme="light"] .toggle-pill.active {
+  background: linear-gradient(135deg, var(--primary), var(--blue));
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(87,80,214,0.28);
+}
+html[data-theme="light"] .modern-view-btn:hover,
+html[data-theme="light"] .view-btn:hover,
+html[data-theme="light"] .btn-primary:hover,
+html[data-theme="light"] .bm-btn.primary:hover,
+html[data-theme="light"] .analyze-btn:hover,
+html[data-theme="light"] .ai-btn:hover,
+html[data-theme="light"] .auth-btn:hover,
+html[data-theme="light"] .toggle-pill.active:hover {
+  filter: brightness(1.06);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(87,80,214,0.35);
+}
+
+/* solid gradient pill for the "All" source/location/provider tab (the
+   catch-all filter) so it reads as the vivid anchor among outline tabs */
+html[data-theme="light"] .src-tab.active-all,
+html[data-theme="light"] .loc-tab.active,
+html[data-theme="light"] .provider-tab.active {
+  background: linear-gradient(135deg, var(--primary), var(--blue));
+  border-color: transparent;
+  color: #ffffff;
+}
+html[data-theme="light"] .src-tab.active-all .src-count,
+html[data-theme="light"] .loc-tab.active .loc-count,
+html[data-theme="light"] .provider-tab.active .provider-count {
+  background: rgba(255,255,255,0.28);
+  color: #ffffff;
+}
+
+/* ── 4) THEME TOGGLE BUTTON (drop into any sidebar) ── */
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--card-border, var(--border, rgba(122,162,255,0.12)));
+  color: var(--text-2, var(--text-secondary, #9bb3ff));
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 8px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  margin-top: 4px;
+}
+.theme-toggle-btn:hover {
+  background: var(--blue-dim, rgba(122,162,255,0.08));
+  color: var(--text-1, var(--text-primary, #e2e8f0));
+  border-color: var(--blue-line, rgba(122,162,255,0.25));
+}
+.theme-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.theme-toggle-btn .icon-sun { display: none; }
+.theme-toggle-btn .icon-moon { display: block; }
+html[data-theme="light"] .theme-toggle-btn .icon-sun { display: block; }
+html[data-theme="light"] .theme-toggle-btn .icon-moon { display: none; }
+
+.theme-toggle-track {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  border-radius: 20px;
+  background: var(--blue-dim, rgba(122,162,255,0.15));
+  border: 1px solid var(--blue-line, rgba(122,162,255,0.25));
+  flex-shrink: 0;
+}
+.theme-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--blue, #7aa2ff);
+  transition: transform 0.2s ease;
+}
+html[data-theme="light"] .theme-toggle-track::after {
+  transform: translateX(14px);
+}
+
+.theme-toggle-label { flex: 1; text-align: left; }

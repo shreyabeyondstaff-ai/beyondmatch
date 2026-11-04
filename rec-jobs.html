@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Jobs – BeyondMatch</title>
+  <link rel="stylesheet" href="recruiter-matches.css" />
+  <link rel="stylesheet" href="skeleton-loader.css" />
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/rec-jobs.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="menu">
+     <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html"     class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html"     class="menu-item">Post Job</a>
+    <a href="rec-jobs.html"     class="menu-item active">My Jobs</a>
+    <a href="jobs.html" class="menu-item">Jobs</a>
+    <a href="cand-matches.html" class="menu-item">Candidate Matches</a>
+    <a href="rec-locatehire.html" class="menu-item">CandidateMap</a>
+     <a href="rec-leads.html" class="menu-item">
+    Find Leads
+</a>
+    <a href="rec-actions.html"  class="menu-item">Recruiter Actions</a>
+    <a href="settings.html"     class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+   
+  </nav>
+</aside>
+
+<main class="main jobs-modern">
+
+  <div class="page-header-modern">
+    <h1 id="jobsPageTitle">My Jobs</h1>
+    <p>Manage and view posted jobs</p>
+  </div>
+
+  <!-- FILTER BAR -->
+<!-- FILTER BAR -->
+  <div class="jobs-filter-modern">
+    <select id="locationFilter" class="modern-select">
+      <option value="">All Locations</option>
+    </select>
+
+    <select id="sortSelect" class="modern-select">
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+      <option value="title">Title A–Z</option>
+    </select>
+
+    <input type="text" id="searchInput" class="modern-search input" placeholder="Search job title…" />
+  </div>
+
+  <!-- SOURCE FILTER -->
+  <div class="source-filter-row">
+    <span class="source-filter-label">Source:</span>
+    <button id="srcAllBtn"  class="src-tab active-all" data-src="">All <span id="srcAllCount"  class="src-count">0</span></button>
+    <button id="srcIntBtn"  class="src-tab" data-src="internal">✦ Internal <span id="srcIntCount"  class="src-count">0</span></button>
+    <button id="srcExtBtn"  class="src-tab" data-src="external">⬡ External <span id="srcExtCount"  class="src-count">0</span></button>
+  </div>
+
+  <!-- LOCATION TABS -->
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;">
+    <span class="source-filter-label">Location:</span>
+    <div id="locationTabsRow" class="location-tabs-row" style="margin-bottom:0;margin-top:0;flex:1;"></div>
+  </div>
+
+  <!-- JOBS GRID -->
+  <div class="jobs-grid-wrapper">
+    <div id="jobsTable" class="jobs-grid"></div>
+  </div>
+
+</main>
+
+<!-- Instant skeletons -->
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+</body>
+</html>

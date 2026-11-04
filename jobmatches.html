@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Matches – BeyondMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="cand-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="cand-sidebar">
+  <a href="/jobmatches.html" style="text-decoration:none;"><h2 class="cand-brand">BeyondMatch</h2></a>
+  <nav class="cand-menu">
+    <a href="candidate-dashboard.html" class="cand-menu-item">Dashboard</a>
+    <a href="resume.html"              class="cand-menu-item">Resume Analysis</a>
+    <a href="jobmatches.html"          class="cand-menu-item active">Job Matches</a>
+    <a href="savedjobs.html"           class="cand-menu-item">Saved Jobs</a>
+    <a href="locatehire.html"          class="cand-menu-item">LocateHire</a>
+        <a href="cand_actions.html"          class="cand-menu-item">Candidate Actions</a>
+    <a href="settings.html"            class="cand-menu-item">Settings</a>
+  </nav>
+  <button class="logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+    <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<main class="cand-main">
+
+  <!-- PAGE TITLE -->
+  <div class="cand-page-title">
+    <h1>Job Matches</h1>
+    <p>AI-matched opportunities based on your resume and skills.</p>
+  </div>
+
+  <!-- SELECT CARD -->
+  <div class="cand-card select-card">
+    <label>Candidate Resume</label>
+    <div class="select-row">
+      <select id="candidateSelect"></select>
+      <button class="btn-primary" onclick="loadCandidateJobMatches()">View Matches</button>
+    </div>
+  </div>
+
+  <!-- MATCHES SECTION -->
+  <div class="matches-section">
+
+    <div class="matches-header">
+      <div>
+        <h3>Matched Jobs</h3>
+        <div class="matches-count" id="matchesCount"></div>
+      </div>
+
+      <div class="match-filters">
+        <select id="locationFilter" class="filter-select">
+          <option value="">All Locations</option>
+        </select>
+
+        <select id="matchFilter" class="filter-select">
+          <option value="">All Match %</option>
+          <option value="50">50%+</option>
+          <option value="60">60%+</option>
+          <option value="70">70%+</option>
+          <option value="80">80%+</option>
+        </select>
+
+        <select id="salarySort" class="filter-select">
+          <option value="">Sort by Salary</option>
+          <option value="high">High → Low</option>
+          <option value="low">Low → High</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div id="matchesGrid" class="matches-grid"></div>
+
+  </div>
+
+</main>
+
+<!-- Idle state is now set by candidate.js on load (identical markup) -->
+
+<!-- ════════ SCRIPTS ════════ -->
+<script type="module" src="auth.js"></script>
+<script type="module" src="candidate.js"></script>
+
+
+<!-- ════════ INLINE APPLY MODAL ════════ -->
+<!-- This modal is opened by window._applyClick() instead of navigating away -->
+<div id="applyOverlay" class="apply-overlay" style="display:none" onclick="if(event.target===this)window.closeApplyModal()">
+  <div class="apply-modal">
+    <button class="apply-modal-close" onclick="window.closeApplyModal()">✕</button>
+    <div style="font-size:11px;color:#7aa2ff;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Quick Apply</div>
+    <h2 id="applyModalTitle" style="margin:0 0 6px;font-size:20px;color:#e2e8f0;">Job Title</h2>
+    <p id="applyModalSub" style="margin:0 0 20px;color:#6b7fa8;font-size:13px;"></p>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a5580;display:block;margin-bottom:8px;">
+        Cover Note <span style="color:#4a5580;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span>
+      </label>
+      <textarea id="applyNoteInput"
+        placeholder="Briefly introduce yourself or why you're a great fit…"
+        style="width:100%;min-height:100px;resize:vertical;
+               background:#090e1c;border:1px solid rgba(122,162,255,.15);
+               border-radius:10px;color:#e2e8f0;font-family:inherit;font-size:13px;
+               padding:12px 14px;outline:none;line-height:1.55;box-sizing:border-box;"
+        onfocus="this.style.borderColor='rgba(122,162,255,.4)'"
+        onblur="this.style.borderColor='rgba(122,162,255,.15)'"
+      ></textarea>
+    </div>
+
+    <div id="applyStatusMsg" style="display:none;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:14px;"></div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+      <button onclick="window.closeApplyModal()" style="font-family:inherit;font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;cursor:pointer;border:1px solid rgba(122,162,255,.2);background:transparent;color:#7aa2ff;transition:all .18s;">Cancel</button>
+      <button id="applySubmitBtn" onclick="window.submitApplyModal()" style="font-family:inherit;font-size:13px;font-weight:600;padding:9px 20px;border-radius:9px;cursor:pointer;border:1px solid rgba(122,162,255,.4);background:rgba(122,162,255,.14);color:#7aa2ff;transition:all .18s;">
+        🚀 Submit Application
+      </button>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "beyondmatch-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "BeyondMatch static frontend. There is no build step: the site is the HTML, JS and CSS in this folder. `dependencies` is an exact-pinned inventory of the browser libraries the pages load from CDNs or ship in libs/ (the HTML pages and utils.js load the same versions with Subresource Integrity hashes; update both together). `devDependencies` are the lint tools used by `npm run lint` and CI.",
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "chart.js": "4.4.3",
+    "firebase": "10.14.1",
+    "leaflet": "1.9.4",
+    "leaflet.markercluster": "1.5.3",
+    "mammoth": "1.13.0",
+    "pdfjs-dist": "3.11.174",
+    "powerbi-client": "2.23.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "eslint": "9.39.5",
+    "eslint-plugin-no-unsanitized": "4.1.5"
+  }
+}

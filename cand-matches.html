@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidate Matches – BeyondMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sidebar">
+  <a href="/cand-matches.html" style="text-decoration:none;"><h2 class="brand">BeyondMatch</h2></a>
+  <nav class="menu">
+      <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html"     class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html"     class="menu-item">Post Job</a>
+    <a href="rec-jobs.html"     class="menu-item">My Jobs</a>
+    <a href="jobs.html" class="menu-item">Jobs</a>
+    <a href="cand-matches.html" class="menu-item active">Candidate Matches</a>
+    <a href="rec-locatehire.html" class="menu-item">CandidateMap</a>
+    <a href="rec-leads.html" class="menu-item">Find Leads</a>
+    <a href="rec-actions.html"  class="menu-item">Recruiter Actions</a>
+    <a href="settings.html"     class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+  
+  </nav>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<main class="main">
+
+  <!-- PAGE TITLE -->
+  <div class="page-title">
+    <h1>Candidate Matches</h1>
+    <p>Select a role to view matching candidates.</p>
+  </div>
+
+  <!-- SELECT CARD — mirrors jobmatches.html exactly -->
+  <div class="card select-card">
+    <label>Job Posting</label>
+    <div class="select-row">
+      <select id="roleDropdown"><option value="">Loading roles…</option></select>
+      <button class="btn-primary" onclick="triggerLoadCandidates()">View Matches</button>
+    </div>
+  </div>
+
+  <!-- MATCHES SECTION -->
+  <div class="matches-section">
+    <div class="matches-header">
+      <div>
+        <h3>Matched Candidates</h3>
+        <div class="matches-count" id="matchesCount"></div>
+      </div>
+      <div class="match-filters">
+        <select id="candSortSelect" class="filter-select">
+          <option value="score">Sort by Score</option>
+          <option value="name">Name A–Z</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+        <input type="text" id="candSearchInput" class="filter-select"
+               style="min-width:170px;background-image:none;padding-right:12px;"
+               placeholder="Search candidate…" />
+      </div>
+    </div>
+
+    <!-- GRID — no transformer, no MutationObserver, plain render -->
+    <div id="candMatchesTable" class="matches-grid"></div>
+  </div>
+
+</main>
+
+<!-- ════════ IDLE STATE ════════ -->
+<!-- ════════ INVITE TO APPLY MODAL ════════ -->
+<div id="inviteOverlay" style="
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.78); backdrop-filter:blur(6px);
+  z-index:1001; align-items:center; justify-content:center;
+  padding:20px; box-sizing:border-box;
+" onclick="if(event.target===this)closeInviteModal()">
+  <div style="
+    background:#0f1220; border:1px solid rgba(122,162,255,0.15);
+    border-radius:16px; width:100%; max-width:500px;
+    padding:28px; box-sizing:border-box; position:relative; color:#e2e8f0;
+  ">
+    <button onclick="closeInviteModal()" style="
+      position:absolute; top:14px; right:16px; background:none; border:none;
+      color:#4a5580; font-size:20px; cursor:pointer; line-height:1;
+    " onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#4a5580'">✕</button>
+
+    <div style="font-size:11px;color:#4ade80;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Invite to Apply</div>
+    <h2 id="inviteModalName" style="margin:0 0 4px;font-size:20px;color:#e2e8f0;"></h2>
+    <p id="inviteModalJob" style="margin:0 0 22px;color:#6b7fa8;font-size:13px;"></p>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a5580;display:block;margin-bottom:8px;">
+        Personal Message <span style="color:#4a5580;font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span>
+      </label>
+      <textarea id="inviteNoteInput" placeholder="Tell the candidate why they're a great fit…"
+        style="width:100%;min-height:90px;resize:vertical;
+               background:#090e1c;border:1px solid rgba(122,162,255,.15);
+               border-radius:10px;color:#e2e8f0;font-family:inherit;font-size:13px;
+               padding:12px 14px;outline:none;line-height:1.55;box-sizing:border-box;"
+        onfocus="this.style.borderColor='rgba(122,162,255,.4)'"
+        onblur="this.style.borderColor='rgba(122,162,255,.15)'"></textarea>
+    </div>
+
+    <div id="inviteStatusMsg" style="display:none;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:14px;"></div>
+
+    <!-- AI draft button -->
+    <div style="margin-bottom:16px;">
+      <button id="inviteAiBtn" onclick="draftInviteWithAI()" style="
+        font-family:inherit;font-size:12px;font-weight:600;
+        padding:7px 14px;border-radius:8px;cursor:pointer;
+        border:1px solid rgba(192,132,252,.25);
+        background:rgba(192,132,252,.08);color:#c084fc;
+        transition:all .18s;display:flex;align-items:center;gap:6px;
+      ">✨ Draft with AI</button>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button onclick="closeInviteModal()" style="
+        font-family:inherit;font-size:13px;font-weight:600;
+        padding:9px 20px;border-radius:9px;cursor:pointer;
+        border:1px solid rgba(122,162,255,.2);
+        background:transparent;color:#7aa2ff;transition:all .18s;
+      ">Cancel</button>
+      <button id="inviteSubmitBtn" onclick="submitInvite()" style="
+        font-family:inherit;font-size:13px;font-weight:600;
+        padding:9px 20px;border-radius:9px;cursor:pointer;
+        border:1px solid rgba(74,222,128,.3);
+        background:rgba(74,222,128,.12);color:#4ade80;transition:all .18s;
+      ">📨 Send Invite</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div id="candProfileOverlay" style="
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.78); backdrop-filter:blur(6px);
+  z-index:1000; align-items:center; justify-content:center;
+  padding:20px; box-sizing:border-box;
+" onclick="if(event.target===this)this.style.display='none'">
+  <div style="
+    background:#0f1220; border:1px solid rgba(122,162,255,0.15);
+    border-radius:16px; width:100%; max-width:520px;
+    max-height:88vh; overflow-y:auto;
+    padding:28px; box-sizing:border-box; position:relative;
+    color:#e2e8f0;
+  ">
+    <button onclick="document.getElementById('candProfileOverlay').style.display='none'" style="
+      position:absolute; top:14px; right:16px;
+      background:none; border:none; color:#4a5580;
+      font-size:20px; cursor:pointer; line-height:1; transition:color .15s;
+    " onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#4a5580'">✕</button>
+    <div id="candProfileContent"></div>
+  </div>
+</div>
+
+
+
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+
+</body>
+</html>

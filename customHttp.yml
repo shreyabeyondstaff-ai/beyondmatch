@@ -1,0 +1,41 @@
+# SEC-09: security response headers for AWS Amplify Hosting.
+#
+# Amplify reads this file from the repository root on each build/deploy
+# (https://docs.aws.amazon.com/amplify/latest/userguide/custom-headers.html).
+# If the app is deployed by manual upload instead, paste the same YAML into
+# Amplify console -> Hosting -> Custom headers (or use
+# `aws amplify update-app --app-id <ID> --custom-headers file://customHttp.yml`).
+#
+# The Content-Security-Policy is built from the origins the app really uses.
+# Keep it in step with package.json / the <script> tags / config.js:
+#   script-src   jsDelivr (Chart.js, powerbi-client, Leaflet, mammoth), cdnjs
+#                (pdf.js), SheetJS CDN, gstatic (Firebase SDK ES modules), Google
+#                Tag Manager (injected by Firebase Analytics), apis.google.com
+#                (Firebase Auth's iframe helper on Safari/mobile).
+#   connect-src  our API Gateway, Firebase Auth/Firestore/Installations/config,
+#                Google Analytics, OpenStreetMap Nominatim and Photon (geocoding).
+#   frame-src    Power BI embed, Firebase Auth helper frame.
+#   img-src      data: only for the inline SVG arrows in the stylesheets and the
+#                empty favicon; OpenStreetMap tiles; jsDelivr (Leaflet images).
+#
+# 'unsafe-inline' is used ONLY for style-src (552 inline style="" attributes and
+# a few <style> blocks) and script-src-attr (about 130 inline onclick="" style
+# handlers). script-src itself allows no inline script and no eval.
+# See SECURITY_REMEDIATION.md, SEC-09, for what remains to be migrated.
+customHeaders:
+  - pattern: '**'
+    headers:
+      - key: 'Content-Security-Policy'
+        value: "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.sheetjs.com https://www.gstatic.com https://www.googletagmanager.com https://apis.google.com; script-src-attr 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.tile.openstreetmap.org https://cdn.jsdelivr.net https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://wx0334lyy6.execute-api.eu-north-1.amazonaws.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://www.googleapis.com https://nominatim.openstreetmap.org https://photon.komoot.io https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src https://app.powerbi.com https://beyondmatch-a714f.firebaseapp.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+      - key: 'Strict-Transport-Security'
+        value: 'max-age=31536000; includeSubDomains'
+      - key: 'X-Content-Type-Options'
+        value: 'nosniff'
+      - key: 'X-Frame-Options'
+        value: 'DENY'
+      - key: 'Referrer-Policy'
+        value: 'strict-origin-when-cross-origin'
+      - key: 'Permissions-Policy'
+        value: 'accelerometer=(), autoplay=(), bluetooth=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), serial=(), usb=(), xr-spatial-tracking=()'
+      - key: 'Cross-Origin-Opener-Policy'
+        value: 'same-origin-allow-popups'

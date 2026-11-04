@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="theme.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CandidateMap – BeyondMatch</title>
+  <link rel="stylesheet" href="recruiter-matches.css" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" />
+  <link rel="stylesheet" href="libs/MarkerCluster.css" />
+  <link rel="stylesheet" href="libs/MarkerCluster.Default.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+  <script src="libs/leaflet.markercluster.js"></script>
+
+  <link rel="stylesheet" href="rec-common.css" />
+  <link rel="stylesheet" href="theme.css" />
+
+</head>
+
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sidebar">
+  <a href="/rec-dash.html" style="text-decoration:none;"><h2 class="brand">BeyondMatch</h2></a>
+  <nav class="menu">
+        <button class="theme-toggle-btn" data-theme-toggle type="button" aria-label="Toggle light/dark theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <span class="theme-toggle-label" data-theme-label>Dark mode</span>
+      <span class="theme-toggle-track"></span>
+    </button>
+    <a href="rec-dash.html"          class="menu-item">Dashboard</a>
+    <a href="rec-postjob.html"       class="menu-item">Post Job</a>
+    <a href="rec-jobs.html"          class="menu-item">My Jobs</a>
+    <a href="jobs.html" class="menu-item">Jobs</a>
+    <a href="cand-matches.html"      class="menu-item">Candidate Matches</a>
+    <a href="rec-locatehire.html"    class="menu-item active">CandidateMap</a>
+     <a href="rec-leads.html" class="menu-item">
+    Find Leads
+</a>
+    <a href="rec-actions.html"       class="menu-item">Recruiter Actions</a>
+    <a href="settings.html"          class="menu-item">Settings</a>
+    <button class="menu-item logout-btn" onclick="unifiedLogout()">⏻ Logout</button>
+
+  </nav>
+</aside>
+
+<!-- ════════ PAGE SHELL ════════ -->
+<div class="page-shell">
+
+  <!-- TITLE BAR -->
+  <div class="page-title-bar">
+    <h1>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#7aa2ff" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+      </svg>
+      CandidateMap
+    </h1>
+    <p>Explore, geographically, the candidates matched to your organisation's open roles.</p>
+    <div class="map-legend">
+      <div class="legend-item">
+        <div class="legend-dot green"></div>
+        <span>Matches your org's jobs</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot blue"></div>
+        <span>Other candidates</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP + PANEL -->
+  <div class="map-row">
+
+    <div id="map"></div>
+
+    <div id="cityPanel" class="city-panel hidden">
+      <div class="panel-header">
+        <div class="panel-title-wrap">
+          <h3 id="panelTitle">Candidates</h3>
+          <div class="panel-job-count" id="panelCount"></div>
+        </div>
+        <button class="panel-close" onclick="closeCityPanel()" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="panel-body" id="panelGrid">
+        <div class="panel-placeholder">
+          <div class="placeholder-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h4>Select a location</h4>
+          <p>Click any marker on the map to explore candidates in that area.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script type="module" src="auth.js"></script>
+<script type="module" src="recruiter.js"></script>
+
+</body>
+</html>
