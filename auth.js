@@ -486,7 +486,17 @@ document.addEventListener("DOMContentLoaded", () => {
 async function _handleSignup(email, password, role, orgName) {
   const btn = document.querySelector(".auth-btn");
 
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  // Set BEFORE the account exists: creating it fires onAuthStateChanged at once,
+  // and the redirect listener must already be told to wait for the signup writes
+  // (otherwise a new recruiter is routed to the candidate dashboard).
+  _signupInProgress = true;
+  let cred;
+  try {
+    cred = await createUserWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    _signupInProgress = false;
+    throw e;
+  }
   const uid  = cred.user.uid; // `uid` only exists in THIS function's scope
 
   // SEC-10: ask the new user to confirm their address. Not enforced (existing
@@ -609,6 +619,10 @@ async function _handleSignup(email, password, role, orgName) {
 
         if (!ok) {
           logError("recruiter registration failed", { code: `HTTP ${status}` });
+        } else {
+          // the backend just granted the recruiter role; pick it up now so the
+          // redirect that follows routes this account to the recruiter dashboard
+          try { await cred.user.getIdToken(true); } catch { /* non-fatal */ }
         }
       } catch (err) {
         logError("recruiter registration failed", err);
