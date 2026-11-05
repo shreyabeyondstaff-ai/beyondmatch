@@ -397,3 +397,97 @@ html[data-theme="light"] .theme-toggle-track::after {
 }
 
 .theme-toggle-label { flex: 1; text-align: left; }
+
+
+/* ============================================================
+   5) COLLAPSIBLE SIDEBAR (every view; behaviour in theme.js)
+   Open: icon + label per entry. Closed: a narrow rail of icons,
+   the page name appears on hover. State class on <html>:
+   .sb-collapsed (closed), .sb-fixed (a position:fixed sidebar).
+   ============================================================ */
+:root { --sb-rail: 64px; }
+
+aside.sidebar,
+aside.cand-sidebar { transition: width 0.2s ease, padding 0.2s ease; }
+
+/* menu button */
+.sb-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 14px;
+  align-self: flex-start;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2, #a8b3d1);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.18s, color 0.18s;
+}
+.sb-toggle:hover {
+  background: var(--blue-dim, rgba(122,162,255,0.08));
+  color: var(--text-1, #e2e8f0);
+}
+.sb-toggle svg { width: 20px; height: 20px; }
+
+/* every entry: icon + label on one line */
+aside .sb-item { display: flex; align-items: center; gap: 10px; }
+aside .sb-icon { display: inline-flex; flex: 0 0 18px; width: 18px; height: 18px; }
+aside .sb-icon svg { width: 18px; height: 18px; }
+aside .sb-label { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- closed: icon rail ---------- */
+html.sb-collapsed aside.sidebar,
+html.sb-collapsed aside.cand-sidebar {
+  width: var(--sb-rail) !important;
+  min-width: var(--sb-rail) !important;
+  padding: 16px 8px !important;
+  overflow: visible !important;       /* lets the hover name sit outside the rail */
+}
+html.sb-collapsed aside .brand,
+html.sb-collapsed aside .cand-brand,
+html.sb-collapsed aside > div { display: none !important; }
+html.sb-collapsed .sb-toggle { align-self: center; }
+html.sb-collapsed aside .sb-label,
+html.sb-collapsed aside .theme-toggle-label,
+html.sb-collapsed aside .theme-toggle-track { display: none !important; }
+html.sb-collapsed aside .sb-item,
+html.sb-collapsed aside .theme-toggle-btn {
+  justify-content: center;
+  gap: 0;
+  padding: 10px 0 !important;
+  width: 100%;
+}
+/* a position:fixed sidebar (cand.css) no longer pushes the page, so move the page */
+html.sb-fixed.sb-collapsed .cand-main { margin-left: var(--sb-rail) !important; }
+
+/* hover / keyboard-focus name, only while closed */
+html.sb-collapsed aside .sb-tip { position: relative; }
+html.sb-collapsed aside .sb-tip:hover::after,
+html.sb-collapsed aside .sb-tip:focus-visible::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--blue-line, rgba(122,162,255,0.25));
+  background: var(--surface-2, #1b2238);
+  color: var(--text-1, #e2e8f0);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  aside.sidebar,
+  aside.cand-sidebar { transition: none; }
+}
