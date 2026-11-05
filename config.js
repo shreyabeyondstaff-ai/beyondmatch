@@ -10,6 +10,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import { getAuth }        from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore }   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getAnalytics }   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app-check.js";
 
 /* ── Firebase ──
    These values identify the Firebase project to the SDK and ARE visible to
@@ -29,6 +30,22 @@ const firebaseConfig = {
 };
 
 export const firebaseApp = initializeApp(firebaseConfig);
+
+/* ── App Check ──
+   The reCAPTCHA Enterprise site key is public (like the Firebase config).
+   App Check must start before Auth and Firestore so their requests carry the
+   token. Paste the real key below; until you do, App Check stays off. Do not
+   turn on "Enforce" in the Firebase console until tokens show as verified. */
+const APP_CHECK_SITE_KEY = "6Lc_8RAuAAAAABzsHrtinUqwYSKjk5kpbz70IOS9";
+if (!APP_CHECK_SITE_KEY.startsWith("PASTE_")) {
+  try {
+    initializeAppCheck(firebaseApp, {
+      provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch { /* the app keeps working; App Check just stays off */ }
+}
+
 export const auth        = getAuth(firebaseApp);
 export const db           = getFirestore(firebaseApp);
 export const analytics    = getAnalytics(firebaseApp);
